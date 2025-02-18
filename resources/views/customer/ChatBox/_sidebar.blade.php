@@ -49,7 +49,7 @@
             </li>
             <li class="nav-item" role="presentation">
                 <a onclick="reloadPage()" class="nav-link" id="unread-tab" data-bs-toggle="tab" href="#unread"
-                    role="tab" aria-controls="unread" aria-selected="false">Unread11
+                    role="tab" aria-controls="unread" aria-selected="false">Unread
                     <span id="unread_count"
                         class="badge bg-primary rounded-pill float-end notification_count">{{ $unread_chats }}</span>
                 </a>
