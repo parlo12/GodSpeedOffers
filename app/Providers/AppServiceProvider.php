@@ -208,8 +208,11 @@
             Schema::defaultStringLength(191);
 
             // Force SSL if isSecure does not detect HTTPS
-            if (config('app.url_force_https')) {
-                URL::forceScheme('https');
+            // if (config('app.url_force_https')) {
+            //     URL::forceScheme('https');
+            // }
+            if (env('APP_ENV') === 'production') {
+                \URL::forceScheme('https');
             }
 
             Relation::morphMap([
