@@ -20,7 +20,7 @@ jobs:
             set -e # Exit immediately on error
             cd /home/support/web/crmstaging.godspeedoffers.com/public_html
             git pull
-            git reset --hard origin/main
+            git reset --hard origin/master
             composer install --no-interaction --no-dev --prefer-dist
             php artisan config:cache
             php artisan route:cache
