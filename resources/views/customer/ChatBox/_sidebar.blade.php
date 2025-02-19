@@ -45,7 +45,7 @@
         <ul class="nav nav-tabs" id="chatTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link " id="read-tab" data-bs-toggle="tab" href="#read" role="tab"
-                    aria-controls="read" aria-selected="false">Read</a>
+                    aria-controls="read" aria-selected="false">Read_test</a>
             </li>
             <li class="nav-item" role="presentation">
                 <a onclick="reloadPage()" class="nav-link" id="unread-tab" data-bs-toggle="tab" href="#unread"
