@@ -406,6 +406,45 @@ class DLRController extends Controller
             ]);
         }
         $to   = str_replace(['(', ')', '+', '-', ' '], '', trim($to));
+// Define the keywords to check
+$keywords = ['wrong number', 'not my house'];
+
+// Check if the message contains any of the keywords
+foreach ($keywords as $keyword) {
+    if (stripos($message, $keyword) !== false) {
+        $url = 'https://workflowtoolstaging.godspeedoffers.com/api/wrong-number/' . $to;
+
+        // Initialize cURL
+        $ch = curl_init();
+
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $url); // Set the full URL to send the request to
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the transfer as a string
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout after 10 seconds
+
+        // Execute the cURL request
+        $response = curl_exec($ch);
+
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            $errorMessage = curl_error($ch);
+            Log::error("cURL error occurred: $errorMessage");
+            return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
+        }
+
+        // Get the HTTP response code
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Close the cURL session
+        curl_close($ch);
+
+        // Decode the response (assuming the API returns JSON)
+        $decodedResponse = json_decode($response, true);
+
+        // Break out of the loop since we only need to send one request
+        break;
+    }
+}
 
         // Use the absolute URL instead of the Laravel route helper
         $url = 'https://internaltools.godspeedoffers.com/api/save-response/' . $to;
