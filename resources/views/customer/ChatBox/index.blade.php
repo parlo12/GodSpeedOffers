@@ -525,14 +525,6 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
         <form id="followup-form">
             <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
             <div class="mb-1">
-                <label for="first-name" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="first-name" name="first_name" value="${response.first_name}">
-            </div>
-            <div class="mb-1">
-                <label for="last-name" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="last-name" name="last_name" value="${response.last_name}">
-            </div>
-            <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
                 <select class="form-select" id="user-id" name="user_id">
                     <option selected>Assign To</option>
@@ -600,14 +592,6 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                     document.getElementById('under-contract').innerHTML = `
         <form id="under-contract-form">
             <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
-            <div class="mb-1">
-                <label for="first-name" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="first-name" name="first_name" value="${response.first_name}">
-            </div>
-            <div class="mb-1">
-                <label for="last-name" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="last-name" name="last_name" value="${response.last_name}">
-            </div>
             <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
                 <select class="form-select" id="user-id" name="user_id">

@@ -365,8 +365,6 @@ class ChatBoxController extends Controller
      */
     public function follow_up(Request $request)
     {
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
         $userId = $request->input('user_id');
         $chat_id = $request->input('chat_id');
         $chat_box = ChatBox::firstWhere('uid', $chat_id);
@@ -386,7 +384,7 @@ class ChatBoxController extends Controller
         }, $data);
 
         $messages = json_encode($data, true);
-        $this->follow_up_lead($first_name, $last_name, $chat_box->to, $userId, $messages);
+        $this->follow_up_lead($chat_box->to, $userId, $messages);
         return response()->json([
             'status'  => 'success',
             'response' => response()->json($userId),
@@ -398,8 +396,6 @@ class ChatBoxController extends Controller
      */
     public function under_contract(Request $request)
     {
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
         $userId = $request->input('user_id');
         $chat_id = $request->input('chat_id');
         $chat_box = ChatBox::firstWhere('uid', $chat_id);
@@ -419,7 +415,7 @@ class ChatBoxController extends Controller
         }, $data);
 
         $messages = json_encode($data, true);
-        $this->under_contract_lead($first_name, $last_name, $chat_box->to, $userId,$messages);
+        $this->under_contract_lead( $chat_box->to, $userId,$messages);
         return response()->json([
             'status'  => 'success',
             'response' => response()->json($chat_box),
@@ -458,11 +454,9 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update lead status.'], $response->status());
         }
     }
-    private function follow_up_lead($first_name, $last_name, $phone, $user_id,$messages)
+    private function follow_up_lead($phone, $user_id,$messages)
     {
         $response = Http::get('https://workflowtoolstaging.godspeedoffers.com/api/follow_up', [
-            'first_name' => $first_name,
-            'last_name' => $last_name,
             'phone' => $phone,
             'user_id' => $user_id,
             'messages'=>$messages
@@ -474,11 +468,9 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
         }
     }
-    private function under_contract_lead($first_name, $last_name, $phone, $user_id,$messages)
+    private function under_contract_lead($phone, $user_id,$messages)
     {
         $response = Http::get('https://workflowtoolstaging.godspeedoffers.com/api/under_contract', [
-            'first_name' => $first_name,
-            'last_name' => $last_name,
             'phone' => $phone,
             'user_id' => $user_id,
             'messages'=>$messages
