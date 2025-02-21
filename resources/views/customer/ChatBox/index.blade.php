@@ -534,7 +534,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
             </div>
             <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
-                <select class="form-select" id="user-org" name="user_org">
+                <select class="form-select" id="user-id" name="user_id">
                     <option selected>Assign To</option>
                     ${response.user_and_orgs.map(user_org => `
                       <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
@@ -610,10 +610,10 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
             </div>
             <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
-                <select class="form-select" id="user-org" name="user_org">
+                <select class="form-select" id="user-id" name="user_id">
                     <option selected>Assign To</option>
                     ${response.user_and_orgs.map(user_org => `
-                      <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                      <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                     ).join('')}
                 </select>
             </div>
