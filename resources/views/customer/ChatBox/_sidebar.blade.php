@@ -200,7 +200,7 @@
             </div>
 
             <!-- Follow tab -->
-            <div class="tab-pane fade" id="starred" role="tabpanel" aria-labelledby="starred-tab">
+            <div class="tab-pane fade" id="followup" role="tabpanel" aria-labelledby="followup-tab">
                 <div id="followup-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
                     <ul class="chat-users-list chat-list media-list">
                         @foreach ($follow_up as $chat)
@@ -242,7 +242,7 @@
             </div>
 
             <!-- Under contract tab -->
-            <div class="tab-pane fade" id="starred" role="tabpanel" aria-labelledby="starred-tab">
+            <div class="tab-pane fade" id="undercontract" role="tabpanel" aria-labelledby="undercontract-tab">
                 <div id="undercontract-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
                     <ul class="chat-users-list chat-list media-list">
                         @foreach ($under_contract as $chat)
@@ -295,6 +295,16 @@
         function reloadStarred() {
             localStorage.setItem('activeTab', 'starred-tab');
             window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+
+        }
+        function reloadFollowup() {
+            localStorage.setItem('activeTab', 'followup-tab');
+            window.location.href = "https://crmstaging.godspeedoffers.com/chat-box?page=1";
+
+        }
+        function reloadUndercontract() {
+            localStorage.setItem('activeTab', 'undercontract-tab');
+            window.location.href = "https://crmstaging.godspeedoffers.com/chat-box?page=1";
 
         }
         window.onload = function() {
