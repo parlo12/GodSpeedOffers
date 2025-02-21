@@ -389,7 +389,7 @@ class ChatBoxController extends Controller
         $this->follow_up_lead($first_name, $last_name, $chat_box->to, $userId, $messages);
         return response()->json([
             'status'  => 'success',
-            'response' => response()->json($chat_box),
+            'response' => response()->json($userId),
             'message' => 'Followup details updated successfully'
         ]);
     }
