@@ -62,11 +62,11 @@
             </li>
             <li onclick="reloadFollowup()" class="nav-item" role="presentation">
                 <a class="nav-link" id="followup-tab" data-bs-toggle="tab" href="#followup" role="tab"
-                    aria-controls="followup" aria-selected="false">Follow up</a>
+                    aria-controls="followup" aria-selected="false">Followup</a>
             </li>
             <li onclick="reloadUndercontract()" class="nav-item" role="presentation">
                 <a class="nav-link" id="undercontract-tab" data-bs-toggle="tab" href="#undercontract" role="tab"
-                    aria-controls="undercontract" aria-selected="false">Undercontract</a>
+                    aria-controls="undercontract" aria-selected="false">contract</a>
             </li>
         </ul>
 

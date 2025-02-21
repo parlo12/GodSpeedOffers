@@ -155,18 +155,17 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="add-note-tab" data-bs-toggle="tab" data-bs-target="#add-note"
-                                    type="button" role="tab" aria-controls="add-note" aria-selected="false">Add
-                                    Note</button>
+                                    type="button" role="tab" aria-controls="add-note" aria-selected="false">Add-Note
+                                </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="follow-up-tab" data-bs-toggle="tab" data-bs-target="#follow-up"
-                                    type="button" role="tab" aria-controls="follow-up" aria-selected="true">Follow
-                                    Up</button>
+                                    type="button" role="tab" aria-controls="follow-up" aria-selected="true">FollowUp</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="under-contract-tab" data-bs-toggle="tab"
                                     data-bs-target="#under-contract" type="button" role="tab"
-                                    aria-controls="under-contract" aria-selected="true">Under Contract</button>
+                                    aria-controls="under-contract" aria-selected="true">Contract</button>
                             </li>
                         </ul>
 
@@ -527,7 +526,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
             <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
                 <select class="form-select" id="user-id" name="user_id">
-                    <option selected>Assign To</option>
+                    <option selected>Assign Follow-up To</option>
                     ${response.user_and_orgs.map(user_org => `
                       <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                     ).join('')}
@@ -595,7 +594,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
             <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
                 <select class="form-select" id="user-id" name="user_id">
-                    <option selected>Assign To</option>
+                    <option selected>Assign under-contract To</option>
                     ${response.user_and_orgs.map(user_org => `
                       <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                     ).join('')}
