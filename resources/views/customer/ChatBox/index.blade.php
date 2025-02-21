@@ -630,7 +630,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
                         $.ajax({
-                            url: '{{ url('/chat-box/update-contact') }}', // Replace with your Laravel endpoint
+                            url: '{{ url('/chat-box/under-contract') }}', // Replace with your Laravel endpoint
                             type: 'POST',
                             data: formData,
                             headers: {
