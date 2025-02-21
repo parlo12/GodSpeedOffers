@@ -409,6 +409,11 @@
         Route::post('/{box}/block', 'ChatBoxController@block')->name('block');
         Route::post('/{box}/view-chat-contact', 'ChatBoxController@view_chat_contact')->name('view-chat-contact');
         Route::post('/update-contact', 'ChatBoxController@update_contact')->name('update-contact');
+        Route::post('/under-contract', 'ChatBoxController@under_contract')->name('under-contract');
+        Route::post('/follow-up', 'ChatBoxController@follow_up')->name('follow-up');
+
+
+
         Route::post('/add-note', 'ChatBoxController@add_note')->name('add-note');
         Route::post('/{box}/get-note', 'ChatBoxController@get_note')->name('get-note');
         Route::post('/{box}/toggle-star', 'ChatBoxController@toggle_star')->name('toggle-star');

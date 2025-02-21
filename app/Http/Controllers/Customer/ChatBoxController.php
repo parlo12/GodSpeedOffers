@@ -91,6 +91,16 @@ class ChatBoxController extends Controller
             ->where('reply_by_customer', true)
             ->orderBy('updated_at', 'desc')
             ->paginate(500);
+        $follow_up = ChatBox::where('user_id', Auth::user()->id)
+            ->where('follow_up', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        $under_contract = ChatBox::where('user_id', Auth::user()->id)
+            ->where('under_contract', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
         $templates = Templates::where('status', true)->where('user_id', auth()->user()->id)->get();
 
         return view('customer.ChatBox.index', [
@@ -99,7 +109,9 @@ class ChatBoxController extends Controller
             'templates'   => $templates,
             'unread_box' => $unread_chat,
             'unread_chats' => $unread_count,
-            'starred_box' =>  $starred_chats
+            'starred_box' =>  $starred_chats,
+            'follow_up' =>  $follow_up,
+            'under_contract' =>  $under_contract
         ]);
     }
 
@@ -348,6 +360,44 @@ class ChatBoxController extends Controller
             'message' => 'Contact details updated successfully'
         ]);
     }
+     /**
+     * update follow up info
+     */
+    public function follow_up(Request $request)
+    {
+        $first_name = $request->input('first_name');
+        $last_name = $request->input('last_name');
+        $userId = $request->input('user_id');
+        $chat_id = $request->input('chat_id');
+        $chat_box = ChatBox::firstWhere('uid', $chat_id);
+        $chat_box->follow_up=1;
+        $chat_box->save();
+        //$this->follow_up_lead($first_name, $last_name, $chat_box->to, $userId);
+        return response()->json([
+            'status'  => 'success',
+            'response' => response()->json($chat_box),
+            'message' => 'Followup details updated successfully'
+        ]);
+    }
+        /**
+     * update follow up info
+     */
+    public function under_contract(Request $request)
+    {
+        $first_name = $request->input('first_name');
+        $last_name = $request->input('last_name');
+        $userId = $request->input('user_id');
+        $chat_id = $request->input('chat_id');
+        $chat_box = ChatBox::firstWhere('uid', $chat_id);
+        $chat_box->under_contract=1;
+        $chat_box->save();
+        //$this->under_contract_lead($first_name, $last_name, $chat_box->to, $userId);
+        return response()->json([
+            'status'  => 'success',
+            'response' => response()->json($chat_box),
+            'message' => 'Under Contract details updated successfully'
+        ]);
+    }
     /**
      * add note
      */
@@ -378,6 +428,36 @@ class ChatBoxController extends Controller
             return response()->json(['message' => 'Lead status updated successfully.']);
         } else {
             return response()->json(['error' => 'Failed to update lead status.'], $response->status());
+        }
+    }
+    private function follow_up_lead($first_name, $last_name, $phone, $user_id)
+    {
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/follow_up', [
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'phone' => $phone,
+            'user_id' => $user_id,
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Follow up status updated successfully.']);
+        } else {
+            return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
+        }
+    }
+    private function under_contract_lead($first_name, $last_name, $phone, $user_id)
+    {
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/follow_up', [
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'phone' => $phone,
+            'user_id' => $user_id,
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'under contract status updated successfully.']);
+        } else {
+            return response()->json(['error' => 'Failed to update under contract status.'], $response->status());
         }
     }
 

@@ -45,7 +45,7 @@
         <ul class="nav nav-tabs" id="chatTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link " id="read-tab" data-bs-toggle="tab" href="#read" role="tab"
-                    aria-controls="read" aria-selected="false">Read_test</a>
+                    aria-controls="read" aria-selected="false">Read</a>
             </li>
             <li class="nav-item" role="presentation">
                 <a onclick="reloadPage()" class="nav-link" id="unread-tab" data-bs-toggle="tab" href="#unread"
@@ -59,6 +59,14 @@
             <li onclick="reloadStarred()" class="nav-item" role="presentation">
                 <a class="nav-link" id="starred-tab" data-bs-toggle="tab" href="#starred" role="tab"
                     aria-controls="starred" aria-selected="false">Starred</a>
+            </li>
+            <li onclick="reloadFollowup()" class="nav-item" role="presentation">
+                <a class="nav-link" id="followup-tab" data-bs-toggle="tab" href="#followup" role="tab"
+                    aria-controls="followup" aria-selected="false">Follow up</a>
+            </li>
+            <li onclick="reloadUndercontract()" class="nav-item" role="presentation">
+                <a class="nav-link" id="undercontract-tab" data-bs-toggle="tab" href="#undercontract" role="tab"
+                    aria-controls="undercontract" aria-selected="false">Undercontract</a>
             </li>
         </ul>
 
@@ -191,6 +199,89 @@
                 </div>
             </div>
 
+            <!-- Follow tab -->
+            <div class="tab-pane fade" id="starred" role="tabpanel" aria-labelledby="starred-tab">
+                <div id="followup-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
+                    <ul class="chat-users-list chat-list media-list">
+                        @foreach ($follow_up as $chat)
+                            @if ($chat->follow_up)
+                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
+                                    <span class="avatar">
+                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
+                                            width="54" alt="Avatar" />
+                                    </span>
+                                    <div class="chat-info flex-grow-1">
+                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
+                                        <p class="card-text text-truncate">
+                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
+                                        </p>
+                                    </div>
+                                    <div class="chat-meta text-nowrap">
+                                        <small
+                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
+                                        @if ($chat->notification)
+                                            <span
+                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
+                                        @endif
+                                        <button type="button"
+                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
+                                            onclick="toggleStar('{{ $chat->uid }}', this)"
+                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
+                                            <i data-feather="star"
+                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            @endif
+                        @endforeach
+                    </ul>
+                    <div class="pagination">
+                        {{ $starred_box->links() }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Under contract tab -->
+            <div class="tab-pane fade" id="starred" role="tabpanel" aria-labelledby="starred-tab">
+                <div id="undercontract-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
+                    <ul class="chat-users-list chat-list media-list">
+                        @foreach ($under_contract as $chat)
+                            @if ($chat->under_contract)
+                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
+                                    <span class="avatar">
+                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
+                                            width="54" alt="Avatar" />
+                                    </span>
+                                    <div class="chat-info flex-grow-1">
+                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
+                                        <p class="card-text text-truncate">
+                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
+                                        </p>
+                                    </div>
+                                    <div class="chat-meta text-nowrap">
+                                        <small
+                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
+                                        @if ($chat->notification)
+                                            <span
+                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
+                                        @endif
+                                        <button type="button"
+                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
+                                            onclick="toggleStar('{{ $chat->uid }}', this)"
+                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
+                                            <i data-feather="star"
+                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            @endif
+                        @endforeach
+                    </ul>
+                    <div class="pagination">
+                        {{ $starred_box->links() }}
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>

@@ -17,7 +17,6 @@
     */
 
     Route::get('/', function () {
-
         if (config('app.stage') == 'new') {
             return redirect('install');
         }
