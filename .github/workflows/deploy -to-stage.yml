@@ -21,7 +21,6 @@ jobs:
             cd /home/support/web/crmstaging.godspeedoffers.com/public_html
             git pull
             git reset --hard origin/master
-            composer install --no-interaction --no-dev --prefer-dist
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
