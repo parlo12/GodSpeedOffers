@@ -456,7 +456,7 @@ class ChatBoxController extends Controller
     }
     private function follow_up_lead($phone, $user_id,$messages)
     {
-        $response = Http::get('https://workflowtoolstaging.godspeedoffers.com/api/follow_up', [
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/follow_up', [
             'phone' => $phone,
             'user_id' => $user_id,
             'messages'=>$messages
@@ -470,7 +470,7 @@ class ChatBoxController extends Controller
     }
     private function under_contract_lead($phone, $user_id,$messages)
     {
-        $response = Http::get('https://workflowtoolstaging.godspeedoffers.com/api/under_contract', [
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/under_contract', [
             'phone' => $phone,
             'user_id' => $user_id,
             'messages'=>$messages
