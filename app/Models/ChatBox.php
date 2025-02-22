@@ -22,7 +22,10 @@
             'reply_by_customer',
             'is_starred',
             'recovered',
-            'wake_time'
+            'note',
+            'wake_time',
+            'under_contract',
+            'follow_up'
         ];
 
         protected $casts = [

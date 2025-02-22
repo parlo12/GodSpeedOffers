@@ -70,14 +70,16 @@
         .preserve-whitespace {
             white-space: pre-wrap;
         }
+
         .chat-content {
-    word-break: break-word;  /* Ensures long words break and don't overflow */
-}
+            word-break: break-word;
+            /* Ensures long words break and don't overflow */
+        }
 
-.chat-time {
-    word-break: break-word;  /* Apply wrapping for the timestamp */
-}
-
+        .chat-time {
+            word-break: break-word;
+            /* Apply wrapping for the timestamp */
+        }
     </style>
 
 @endsection
@@ -117,18 +119,20 @@
                         <div class="avatar avatar-border user-profile-toggle m-0 me-1"></div>
                     </div>
                     <div class="d-flex align-items-center">
-
                         <span class="view-chat-contact" data-bs-toggle="tooltip" data-bs-placement="top"
                             title="{{ __('locale.labels.view') }}"> <i data-feather="eye"
-                                class="cursor-pointer font-medium-2 text-primary"></i> </span>
+                                class="cursor-pointer font-medium-2 text-primary"></i>
+                        </span>
 
                         <span class="add-to-blacklist" data-bs-toggle="tooltip" data-bs-placement="top"
                             title="{{ __('locale.labels.block') }}"> <i data-feather="shield"
-                                class="cursor-pointer font-medium-2 mx-1 text-primary"></i> </span>
+                                class="cursor-pointer font-medium-2 mx-1 text-primary"></i>
+                        </span>
 
                         <span class="remove-btn" data-bs-toggle="tooltip" data-bs-placement="top"
                             title="{{ __('locale.buttons.delete') }}"><i data-feather="trash"
-                                class="cursor-pointer font-medium-2 text-danger"></i></span>
+                                class="cursor-pointer font-medium-2 text-danger"></i>
+                        </span>
 
                     </div>
                 </header>
@@ -151,8 +155,17 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="add-note-tab" data-bs-toggle="tab" data-bs-target="#add-note"
-                                    type="button" role="tab" aria-controls="add-note" aria-selected="false">Add
-                                    Note</button>
+                                    type="button" role="tab" aria-controls="add-note" aria-selected="false">Add-Note
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="follow-up-tab" data-bs-toggle="tab" data-bs-target="#follow-up"
+                                    type="button" role="tab" aria-controls="follow-up" aria-selected="true">FollowUp</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="under-contract-tab" data-bs-toggle="tab"
+                                    data-bs-target="#under-contract" type="button" role="tab"
+                                    aria-controls="under-contract" aria-selected="true">Contract</button>
                             </li>
                         </ul>
 
@@ -168,6 +181,16 @@
                             <div class="tab-pane fade" id="add-note" role="tabpanel" aria-labelledby="add-note-tab">
 
                             </div>
+                            {{-- Follow up --}}
+                            <div class="tab-pane fade show " id="follow-up" role="tabpanel"
+                                aria-labelledby="follow-up-tab">
+
+                            </div>
+                            {{-- Under contract --}}
+                            <div class="tab-pane fade show " id="under-contract" role="tabpanel"
+                                aria-labelledby="under-contract-tab">
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,8 +204,7 @@
 
                 <div class="input-group input-group-merge me-1 form-send-message">
                     <textarea type="text" id="message" class="form-control message"
-          placeholder="{{ __('locale.campaigns.type_your_message') }}"
-          style="width: 300px;"></textarea>
+                        placeholder="{{ __('locale.campaigns.type_your_message') }}" style="width: 300px;"></textarea>
 
                 </div>
                 <div class="align-items-center">
@@ -215,7 +237,7 @@
                     <span class="d-none d-lg-block">{{ __('locale.buttons.send') }}</span>
                 </button>
             </form>
-            <!--/ Submit Chat form -->
+            <!--/ Submit Chat form -->.
         </div>
 
         <!--/ Active Chat -->
@@ -407,7 +429,7 @@
                 });
         }
 
-        $(document).on("click",".chat-users-list li", function() {
+        $(document).on("click", ".chat-users-list li", function() {
             console.log("I AM HERE");
             clearInterval(messageInterval);
 
@@ -490,6 +512,144 @@
                 .fail(function(xhr, status, error) {
                     console.log(error);
                 });
+// ***************************
+$.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
+                    _token: "{{ csrf_token() }}"
+                })
+                .done(function(response) {
+                    console.log(response);
+
+                    // Populate the form with response data
+                    document.getElementById('follow-up').innerHTML = `
+        <form id="followup-form">
+            <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
+            <div class="mb-1">
+                <label for="user-org" class="form-label">User & Org</label>
+                <select class="form-select" id="user-id" name="user_id">
+                    <option selected>Assign Follow-up To</option>
+                    ${response.user_and_orgs.map(user_org => `
+                      <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Mark Follow UP</button>
+        </form>`;
+
+                    // Make Contact Group read-only if group_id is not null
+                    if (response.group_id !== null) {
+                        document.getElementById('contact-group').setAttribute('disabled', true);
+                    }
+
+                    // Add event listener for form submission
+                    $('#followup-form').on('submit', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        const formData = $(this).serialize(); // Serialize the form data
+                        $.ajax({
+                            url: '{{ url('/chat-box/follow-up') }}', // Replace with your Laravel endpoint
+                            type: 'POST',
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
+                            },
+                            success: function(response) {
+                                toastr['success'](response.message, 'Success!!', {
+                                    closeButton: true,
+                                    positionClass: 'toast-top-right',
+                                    progressBar: true,
+                                    newestOnTop: true,
+                                    rtl: isRtl
+                                });
+                                console.log('Follow up updated successfully:', response);
+                            },
+                            error: function(xhr, status, error) {
+                                toastr['warning']('Server Error',
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                                console.log('Error updating followup:', error);
+                            }
+                        });
+                    });
+                })
+                .fail(function(xhr, status, error) {
+                    console.log(error);
+                });
+// ***************************************
+
+// under contract
+$.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
+                    _token: "{{ csrf_token() }}"
+                })
+                .done(function(response) {
+                    console.log(response);
+
+                    // Populate the form with response data
+                    document.getElementById('under-contract').innerHTML = `
+        <form id="under-contract-form">
+            <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
+            <div class="mb-1">
+                <label for="user-org" class="form-label">User & Org</label>
+                <select class="form-select" id="user-id" name="user_id">
+                    <option selected>Assign under-contract To</option>
+                    ${response.user_and_orgs.map(user_org => `
+                      <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Mark as Under Contract</button>
+        </form>`;
+
+                    // Make Contact Group read-only if group_id is not null
+                    if (response.group_id !== null) {
+                        document.getElementById('contact-group').setAttribute('disabled', true);
+                    }
+
+                    // Add event listener for form submission
+                    $('#under-contract-form').on('submit', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        const formData = $(this).serialize(); // Serialize the form data
+                        $.ajax({
+                            url: '{{ url('/chat-box/under-contract') }}', // Replace with your Laravel endpoint
+                            type: 'POST',
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
+                            },
+                            success: function(response) {
+                                toastr['success'](response.message, 'Success!!', {
+                                    closeButton: true,
+                                    positionClass: 'toast-top-right',
+                                    progressBar: true,
+                                    newestOnTop: true,
+                                    rtl: isRtl
+                                });
+                                console.log('under Contract updated successfully:', response);
+                            },
+                            error: function(xhr, status, error) {
+                                toastr['warning']('Server Error',
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                                console.log('Error updating contact:', error);
+                            }
+                        });
+                    });
+                })
+                .fail(function(xhr, status, error) {
+                    console.log(error);
+                });
+// ***************************************
+
+
+
             $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                     _token: "{{ csrf_token() }}"
                 })
@@ -513,7 +673,7 @@
                 <select class="form-select" id="user-org" name="user_org">
                     <option selected>Select org</option>
                     ${response.user_and_orgs.map(user_org => `
-                                                            <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                                                                                <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                     ).join('')}
                 </select>
             </div>
@@ -532,7 +692,7 @@
                 <select class="form-select" id="contact-group" name="contact_group">
                     <option selected>Select Group</option>
                     ${response.groups.map(group => `
-                                                            <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
+                                                                                <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
                     ).join('')}
                 </select>
             </div>
@@ -742,9 +902,6 @@
                 }
             });
         }
-
-
-
         $(".remove-btn").on('click', function(event) {
             event.preventDefault();
             let sms_id = $(".chat_id").val();
@@ -980,6 +1137,7 @@
                 }
             });
         });
+
 
 
         @if (config('broadcasting.connections.pusher.app_id'))

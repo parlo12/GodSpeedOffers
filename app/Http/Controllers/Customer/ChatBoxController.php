@@ -91,6 +91,16 @@ class ChatBoxController extends Controller
             ->where('reply_by_customer', true)
             ->orderBy('updated_at', 'desc')
             ->paginate(500);
+        $follow_up = ChatBox::where('user_id', Auth::user()->id)
+            ->where('follow_up', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        $under_contract = ChatBox::where('user_id', Auth::user()->id)
+            ->where('under_contract', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
         $templates = Templates::where('status', true)->where('user_id', auth()->user()->id)->get();
 
         return view('customer.ChatBox.index', [
@@ -99,7 +109,9 @@ class ChatBoxController extends Controller
             'templates'   => $templates,
             'unread_box' => $unread_chat,
             'unread_chats' => $unread_count,
-            'starred_box' =>  $starred_chats
+            'starred_box' =>  $starred_chats,
+            'follow_up' =>  $follow_up,
+            'under_contract' =>  $under_contract
         ]);
     }
 
@@ -349,6 +361,68 @@ class ChatBoxController extends Controller
         ]);
     }
     /**
+     * update follow up info
+     */
+    public function follow_up(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $chat_id = $request->input('chat_id');
+        $chat_box = ChatBox::firstWhere('uid', $chat_id);
+        $chat_box->follow_up = 1;
+        $chat_box->save();
+        $data = ChatBoxMessage::where('box_id', $chat_box->id)
+            ->orderBy('created_at')
+            ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
+            ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
+            ->toArray();
+        $timezone = Auth::user()->timezone ?? config('app.timezone');
+
+        $data = array_map(function ($message) use ($timezone) {
+            $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
+
+            return $message;
+        }, $data);
+
+        $messages = json_encode($data, true);
+        $this->follow_up_lead($chat_box->to, $userId, $messages);
+        return response()->json([
+            'status'  => 'success',
+            'response' => response()->json($userId),
+            'message' => 'Followup details updated successfully'
+        ]);
+    }
+    /**
+     * update follow up info
+     */
+    public function under_contract(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $chat_id = $request->input('chat_id');
+        $chat_box = ChatBox::firstWhere('uid', $chat_id);
+        $chat_box->under_contract = 1;
+        $chat_box->save();
+        $data = ChatBoxMessage::where('box_id', $chat_box->id)
+            ->orderBy('created_at')
+            ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
+            ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
+            ->toArray();
+        $timezone = Auth::user()->timezone ?? config('app.timezone');
+
+        $data = array_map(function ($message) use ($timezone) {
+            $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
+
+            return $message;
+        }, $data);
+
+        $messages = json_encode($data, true);
+        $this->under_contract_lead( $chat_box->to, $userId,$messages);
+        return response()->json([
+            'status'  => 'success',
+            'response' => response()->json($chat_box),
+            'message' => 'Under Contract details updated successfully'
+        ]);
+    }
+    /**
      * add note
      */
     public function add_note(Request $request)
@@ -380,6 +454,34 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update lead status.'], $response->status());
         }
     }
+    private function follow_up_lead($phone, $user_id,$messages)
+    {
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/follow_up', [
+            'phone' => $phone,
+            'user_id' => $user_id,
+            'messages'=>$messages
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Follow up status updated successfully.']);
+        } else {
+            return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
+        }
+    }
+    private function under_contract_lead($phone, $user_id,$messages)
+    {
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/under_contract', [
+            'phone' => $phone,
+            'user_id' => $user_id,
+            'messages'=>$messages
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'under contract status updated successfully.']);
+        } else {
+            return response()->json(['error' => 'Failed to update under contract status.'], $response->status());
+        }
+    }
 
 
     /**
@@ -399,10 +501,9 @@ class ChatBoxController extends Controller
             ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
             ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
             ->toArray();
-
+        $timezone = Auth::user()->timezone ?? config('app.timezone');
         $data = array_map(function ($message) use ($timezone) {
             $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
-
             return $message;
         }, $data);
 

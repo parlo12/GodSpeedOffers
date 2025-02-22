@@ -2,4 +2,4 @@
 .env.example
 .htaccess
 .well-known/
-/vendor
+vendor/
