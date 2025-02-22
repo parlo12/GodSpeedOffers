@@ -288,23 +288,23 @@
     <script>
         function reloadPage() {
             localStorage.setItem('activeTab', 'unread-tab');
-            window.location.href = "https://godspeedoffers.com/chat-box?page=1";
+            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
         function reloadStarred() {
             localStorage.setItem('activeTab', 'starred-tab');
-            window.location.href = "https://godspeedoffers.com/chat-box?page=1";
+            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
         function reloadFollowup() {
             localStorage.setItem('activeTab', 'followup-tab');
-            window.location.href = "https://godspeedoffers.com/chat-box?page=1";
+            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
         function reloadUndercontract() {
             localStorage.setItem('activeTab', 'undercontract-tab');
-            window.location.href = "https://godspeedoffers.com/chat-box?page=1";
+            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
         window.onload = function() {
