@@ -412,7 +412,7 @@ $keywords = ['wrong number', 'not my house'];
 // Check if the message contains any of the keywords
 foreach ($keywords as $keyword) {
     if (stripos($message, $keyword) !== false) {
-        $url = 'https://workflowtoolstaging.godspeedoffers.com/api/wrong-number/' . $to;
+        $url = 'https://internaltools.godspeedoffers.com/api/wrong-number/' . $to;
 
         // Initialize cURL
         $ch = curl_init();
@@ -420,7 +420,7 @@ foreach ($keywords as $keyword) {
         // Set cURL options
         curl_setopt($ch, CURLOPT_URL, $url); // Set the full URL to send the request to
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the transfer as a string
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout after 10 seconds
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout after 10
 
         // Execute the cURL request
         $response = curl_exec($ch);
