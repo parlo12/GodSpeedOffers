@@ -477,6 +477,7 @@ class ChatBoxController extends Controller
         ]);
 
         if ($response->successful()) {
+            Log::info("Under contract Api hit successfully");
             return response()->json(['message' => 'under contract status updated successfully.']);
         } else {
             return response()->json(['error' => 'Failed to update under contract status.'], $response->status());
