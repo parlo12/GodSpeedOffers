@@ -541,6 +541,8 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                     }
 
                     // Add event listener for form submission
+                    $(document).ready(function() {
+
                     $('#followup-form').on('submit', function(e) {
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
@@ -573,7 +575,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                                 console.log('Error updating followup:', error);
                             }
                         });
-                    });
+                    })});
                 })
                 .fail(function(xhr, status, error) {
                     console.log(error);
@@ -609,6 +611,8 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                     }
 
                     // Add event listener for form submission
+                    $(document).ready(function() {
+
                     $('#under-contract-form').on('submit', function(e) {
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
@@ -641,7 +645,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                                 console.log('Error updating contact:', error);
                             }
                         });
-                    });
+                    })});
                 })
                 .fail(function(xhr, status, error) {
                     console.log(error);
