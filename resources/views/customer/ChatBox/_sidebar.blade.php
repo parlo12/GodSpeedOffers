@@ -375,13 +375,13 @@
 
         function reloadUndercontract() {
             localStorage.setItem('activeTab', 'undercontract-tab');
-            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
         function reloadFreshlead() {
             localStorage.setItem('activeTab', 'freshlead-tab');
-            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
