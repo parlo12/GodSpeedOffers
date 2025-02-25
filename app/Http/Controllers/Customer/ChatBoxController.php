@@ -143,11 +143,7 @@ class ChatBoxController extends Controller
         //     ->orderBy('updated_at', 'desc')
         //     ->get();
 
-        // $starred_chats = ChatBox::where('user_id', Auth::user()->id)
-        //     ->where('is_starred', true)
-        //     ->where('reply_by_customer', true)
-        //     ->orderBy('updated_at', 'desc')
-        //     ->get();
+        
 
         return response()->json([
             'status' => 'success',
