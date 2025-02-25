@@ -25,7 +25,8 @@
             'note',
             'wake_time',
             'under_contract',
-            'follow_up'
+            'follow_up',
+            'pipeline_user'
         ];
 
         protected $casts = [
