@@ -171,7 +171,7 @@
 
                         <!-- Tab content -->
                         <div class="tab-content" id="myTabContent">
-                            <!-- Update Contact Tab -->
+                            <!-- Update  Tab -->
                             <div class="tab-pane fade show active" id="update-contact" role="tabpanel"
                                 aria-labelledby="update-contact-tab">
 
