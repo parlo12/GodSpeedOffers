@@ -511,7 +511,8 @@ class ChatBoxController extends Controller
         ]);
 
         if ($response->successful()) {
-            return response()->json(['message' => 'Follow up status updated successfully.']);
+            Log::info("Fresh lead Api hit successfully");
+            return response()->json(['message' => 'Fresh lead status updated successfully.']);
         } else {
             return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
         }
