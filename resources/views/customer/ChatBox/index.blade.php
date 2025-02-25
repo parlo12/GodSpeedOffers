@@ -186,7 +186,7 @@
                                 aria-labelledby="follow-up-tab">
 
                             </div>
-                            {{-- Under contract --}}
+                            {{-- Under  --}}
                             <div class="tab-pane fade show " id="under-contract" role="tabpanel"
                                 aria-labelledby="under-contract-tab">
 
