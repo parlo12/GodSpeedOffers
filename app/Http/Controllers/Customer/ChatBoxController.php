@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Repositories\Contracts\ContactsRepository;
 use App\Library\Tool;
-
+use App\Models\User;
 use Log;
 
 class ChatBoxController extends Controller
@@ -92,12 +92,20 @@ class ChatBoxController extends Controller
             ->orderBy('updated_at', 'desc')
             ->paginate(500);
         $follow_up = ChatBox::where('user_id', Auth::user()->id)
+            ->orWhere('pipeline_user', Auth::user()->id)
             ->where('follow_up', true)
             ->where('reply_by_customer', true)
             ->orderBy('updated_at', 'desc')
             ->paginate(500);
         $under_contract = ChatBox::where('user_id', Auth::user()->id)
+            ->orWhere('pipeline_user', Auth::user()->id)
             ->where('under_contract', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        $fresh_lead = ChatBox::where('user_id', Auth::user()->id)
+            ->orWhere('pipeline_user', Auth::user()->id)
+            ->where('fresh_lead', true)
             ->where('reply_by_customer', true)
             ->orderBy('updated_at', 'desc')
             ->paginate(500);
@@ -111,7 +119,8 @@ class ChatBoxController extends Controller
             'unread_chats' => $unread_count,
             'starred_box' =>  $starred_chats,
             'follow_up' =>  $follow_up,
-            'under_contract' =>  $under_contract
+            'under_contract' =>  $under_contract,
+            'fresh_lead'=>$fresh_lead
         ]);
     }
 
@@ -363,12 +372,15 @@ class ChatBoxController extends Controller
     /**
      * update follow up info
      */
-    public function follow_up(Request $request)
+    public function add_pipeline(Request $request)
     {
         $userId = $request->input('user_id');
         $chat_id = $request->input('chat_id');
+        $pipeline=$request->input('pipeline');
+        $crm_user=$request->input('crm_user');
         $chat_box = ChatBox::firstWhere('uid', $chat_id);
-        $chat_box->follow_up = 1;
+        $chat_box->$pipeline = 1;
+        $chat_box->pipeline_user=$crm_user;
         $chat_box->save();
         $data = ChatBoxMessage::where('box_id', $chat_box->id)
             ->orderBy('created_at')
@@ -384,11 +396,19 @@ class ChatBoxController extends Controller
         }, $data);
 
         $messages = json_encode($data, true);
-        $this->follow_up_lead($chat_box->to, $userId, $messages);
+        if($pipeline=="follow_up"){
+            $this->follow_up_lead($chat_box->to, $userId, $messages);
+        }
+        else if($pipeline=="under_contract"){
+            $this->under_contract_lead( $chat_box->to, $userId,$messages);
+        }
+        else{
+            $this->fresh_lead( $chat_box->to, $userId,$messages);
+        }
         return response()->json([
             'status'  => 'success',
-            'response' => response()->json($userId),
-            'message' => 'Followup details updated successfully'
+            'response' => response()->json($chat_box),
+            'message' => 'Pipeline details updated successfully'
         ]);
     }
     /**
@@ -415,7 +435,6 @@ class ChatBoxController extends Controller
         }, $data);
 
         $messages = json_encode($data, true);
-        $this->under_contract_lead( $chat_box->to, $userId,$messages);
         return response()->json([
             'status'  => 'success',
             'response' => response()->json($chat_box),
@@ -483,6 +502,20 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update under contract status.'], $response->status());
         }
     }
+    private function fresh_lead($phone, $user_id,$messages)
+    {
+        $response = Http::get('https://internaltools.godspeedoffers.com/api/fresh_lead', [
+            'phone' => $phone,
+            'user_id' => $user_id,
+            'messages'=>$messages
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Follow up status updated successfully.']);
+        } else {
+            return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
+        }
+    }
 
 
     /**
@@ -539,6 +572,48 @@ class ChatBoxController extends Controller
             ]
         );
     }
+      /**
+     * remove followup
+     */
+    public function remove_followup(ChatBox $box): JsonResponse
+    {
+        $box->follow_up = !$box->follow_up;
+        $box->save();
+        return response()->json(
+            [
+                'status' => 'success',
+                'message'   => 'follow up removed',
+            ]
+        );
+    }
+       /**
+     * remove undercontract
+     */
+    public function remove_undercontract(ChatBox $box): JsonResponse
+    {
+        $box->under_contract = !$box->under_contract;
+        $box->save();
+        return response()->json(
+            [
+                'status' => 'success',
+                'message'   => 'under_contract removed',
+            ]
+        );
+    }
+        /**
+     * remove freshlead
+     */
+    public function remove_freshlead(ChatBox $box): JsonResponse
+    {
+        $box->fresh_lead = !$box->fresh_lead;
+        $box->save();
+        return response()->json(
+            [
+                'status' => 'success',
+                'message'   => 'fresh lead removed',
+            ]
+        );
+    }
     /**
      * get chat additional_info
      */
@@ -571,13 +646,15 @@ class ChatBoxController extends Controller
                 }
             }
         }
+        $crm_users=User::all();
         return response()->json([
             'status' => 'success',
             'group_id'   => $contact_group_id,
             'groups' => $groups,
             'first_name' => $first_name,
             'last_name' => $last_name,
-            'user_and_orgs' => $this->fetchUsersAndOrgs()->original
+            'user_and_orgs' => $this->fetchUsersAndOrgs()->original,
+            'crm_users'=>$crm_users
         ]);
     }
 

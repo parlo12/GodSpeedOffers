@@ -160,12 +160,8 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="follow-up-tab" data-bs-toggle="tab" data-bs-target="#follow-up"
-                                    type="button" role="tab" aria-controls="follow-up" aria-selected="true">FollowUp</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="under-contract-tab" data-bs-toggle="tab"
-                                    data-bs-target="#under-contract" type="button" role="tab"
-                                    aria-controls="under-contract" aria-selected="true">Contract</button>
+                                    type="button" role="tab" aria-controls="follow-up"
+                                    aria-selected="true">Pipelines</button>
                             </li>
                         </ul>
 
@@ -357,7 +353,6 @@
         }
 
         function pullMessages(chat_id) {
-            console.log('Pullin messages');
 
             $.post(`{{ url('/chat-box') }}/${chat_id}/messages`, {
                     _token: "{{ csrf_token() }}"
@@ -430,7 +425,7 @@
         }
 
         $(document).on("click", ".chat-users-list li", function() {
-            console.log("I AM HERE");
+
             clearInterval(messageInterval);
 
             chatHistory.empty();
@@ -439,7 +434,7 @@
             }, 0)
 
             const chat_id = $(this).data('id');
-            console.log(chat_id)
+
             startMessagePulling(chat_id);
 
 
@@ -512,8 +507,8 @@
                 .fail(function(xhr, status, error) {
                     console.log(error);
                 });
-// ***************************
-$.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
+            // ***************************
+            $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                     _token: "{{ csrf_token() }}"
                 })
                 .done(function(response) {
@@ -521,138 +516,77 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
 
                     // Populate the form with response data
                     document.getElementById('follow-up').innerHTML = `
-        <form id="followup-form">
+        <form id="pipeline-form">
             <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
             <div class="mb-1">
                 <label for="user-org" class="form-label">User & Org</label>
-                <select class="form-select" id="user-id" name="user_id">
-                    <option selected>Assign Follow-up To</option>
+                <select required class="form-select" id="user-id" name="user_id">
+                    <option selected>Assign To</option>
                     ${response.user_and_orgs.map(user_org => `
-                      <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                          <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                     ).join('')}
                 </select>
+                <label for=crm_user" class="form-label">CRM User</label>
+                <select required class="form-select" id="crm-user" name="crm_user">
+                    <option selected>Select CRM user</option>
+                    ${response.crm_users.map(crm_user => `
+                          <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
+                    ).join('')}
+                </select>
+                <label for="pipeline" class="form-label">Pipeline</label>
+                <select required class="form-select" id="pipeline" name="pipeline">
+                    <option selected>Choose Pipeline</option>
+                    <option value="follow_up">Follow Up</option>
+                    <option value="under_contract">Under Contract</option>
+                    <option value="fresh_lead">Fresh Lead</option>
+
+                </select>
             </div>
-            <button type="submit" class="btn btn-primary">Mark Follow UP</button>
+            <button type="submit" class="btn btn-primary">Add To Pipeline</button>
         </form>`;
-
-                    // Make Contact Group read-only if group_id is not null
-                    if (response.group_id !== null) {
-                        document.getElementById('contact-group').setAttribute('disabled', true);
-                    }
-
                     // Add event listener for form submission
                     $(document).ready(function() {
 
-                    $('#followup-form').on('submit', function(e) {
-                        e.preventDefault(); // Prevent default form submission
-                        const formData = $(this).serialize(); // Serialize the form data
-                        $.ajax({
-                            url: '{{ url('/chat-box/follow-up') }}', // Replace with your Laravel endpoint
-                            type: 'POST',
-                            data: formData,
-                            headers: {
-                                'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
-                            },
-                            success: function(response) {
-                                toastr['success'](response.message, 'Success!!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                                console.log('Follow up updated successfully:', response);
-                            },
-                            error: function(xhr, status, error) {
-                                toastr['warning']('Server Error',
-                                    "{{ __('locale.labels.attention') }}", {
+                        $('#pipeline-form').on('submit', function(e) {
+                            e.preventDefault(); // Prevent default form submission
+                            const formData = $(this).serialize(); // Serialize the form data
+                            $.ajax({
+                                url: '{{ url('/chat-box/add-pipeline') }}', // Replace with your Laravel endpoint
+                                type: 'POST',
+                                data: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
+                                },
+                                success: function(response) {
+                                    toastr['success'](response.message,
+                                    'Success!!', {
                                         closeButton: true,
                                         positionClass: 'toast-top-right',
                                         progressBar: true,
                                         newestOnTop: true,
                                         rtl: isRtl
                                     });
-                                console.log('Error updating followup:', error);
-                            }
-                        });
-                    })});
+                                    console.log('Pipeline updated successfully:',
+                                        response);
+                                },
+                                error: function(xhr, status, error) {
+                                    toastr['warning']('Server Error',
+                                        "{{ __('locale.labels.attention') }}", {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
+                                    console.log('Error updating pipeline:', error);
+                                }
+                            });
+                        })
+                    });
                 })
                 .fail(function(xhr, status, error) {
                     console.log(error);
                 });
-// ***************************************
-
-// under contract
-$.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
-                    _token: "{{ csrf_token() }}"
-                })
-                .done(function(response) {
-                    console.log(response);
-
-                    // Populate the form with response data
-                    document.getElementById('under-contract').innerHTML = `
-        <form id="under-contract-form">
-            <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
-            <div class="mb-1">
-                <label for="user-org" class="form-label">User & Org</label>
-                <select class="form-select" id="user-id" name="user_id">
-                    <option selected>Assign under-contract To</option>
-                    ${response.user_and_orgs.map(user_org => `
-                      <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
-                    ).join('')}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Mark as Under Contract</button>
-        </form>`;
-
-                    // Make Contact Group read-only if group_id is not null
-                    if (response.group_id !== null) {
-                        document.getElementById('contact-group').setAttribute('disabled', true);
-                    }
-
-                    // Add event listener for form submission
-                    $(document).ready(function() {
-
-                    $('#under-contract-form').on('submit', function(e) {
-                        e.preventDefault(); // Prevent default form submission
-                        const formData = $(this).serialize(); // Serialize the form data
-                        $.ajax({
-                            url: '{{ url('/chat-box/under-contract') }}', // Replace with your Laravel endpoint
-                            type: 'POST',
-                            data: formData,
-                            headers: {
-                                'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
-                            },
-                            success: function(response) {
-                                toastr['success'](response.message, 'Success!!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                                console.log('under Contract updated successfully:', response);
-                            },
-                            error: function(xhr, status, error) {
-                                toastr['warning']('Server Error',
-                                    "{{ __('locale.labels.attention') }}", {
-                                        closeButton: true,
-                                        positionClass: 'toast-top-right',
-                                        progressBar: true,
-                                        newestOnTop: true,
-                                        rtl: isRtl
-                                    });
-                                console.log('Error updating contact:', error);
-                            }
-                        });
-                    })});
-                })
-                .fail(function(xhr, status, error) {
-                    console.log(error);
-                });
-// ***************************************
-
-
 
             $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                     _token: "{{ csrf_token() }}"
@@ -677,7 +611,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                 <select class="form-select" id="user-org" name="user_org">
                     <option selected>Select org</option>
                     ${response.user_and_orgs.map(user_org => `
-                                                                                <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                                                                                    <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                     ).join('')}
                 </select>
             </div>
@@ -696,7 +630,7 @@ $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
                 <select class="form-select" id="contact-group" name="contact_group">
                     <option selected>Select Group</option>
                     ${response.groups.map(group => `
-                                                                                <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
+                                                                                    <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
                     ).join('')}
                 </select>
             </div>

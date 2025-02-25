@@ -410,7 +410,7 @@
         Route::post('/{box}/view-chat-contact', 'ChatBoxController@view_chat_contact')->name('view-chat-contact');
         Route::post('/update-contact', 'ChatBoxController@update_contact')->name('update-contact');
         Route::post('/under-contract', 'ChatBoxController@under_contract')->name('under-contract');
-        Route::post('/follow-up', 'ChatBoxController@follow_up')->name('follow-up');
+        Route::post('/add-pipeline', 'ChatBoxController@add_pipeline')->name('add-pipeline');
 
 
 
@@ -418,6 +418,9 @@
         Route::post('/{box}/get-note', 'ChatBoxController@get_note')->name('get-note');
         Route::post('/{box}/toggle-star', 'ChatBoxController@toggle_star')->name('toggle-star');
         Route::get('/refresh-chat-box','ChatBoxController@refresh_sidebar' )->name('refresh.sidebar');
+        Route::post('/{box}/remove-followup', 'ChatBoxController@remove_followup')->name('remove-followup');
+        Route::post('/{box}/remove-freshlead', 'ChatBoxController@remove_freshlead')->name('remove-freshlead');
+        Route::post('/{box}/remove-undercontract', 'ChatBoxController@remove_undercontract')->name('remove-undercontract');
 
     });
 

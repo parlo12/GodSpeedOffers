@@ -66,8 +66,13 @@
             </li>
             <li onclick="reloadUndercontract()" class="nav-item" role="presentation">
                 <a class="nav-link" id="undercontract-tab" data-bs-toggle="tab" href="#undercontract" role="tab"
-                    aria-controls="undercontract" aria-selected="false">contract</a>
+                    aria-controls="undercontract" aria-selected="false">Under Contract</a>
             </li>
+            <li onclick="reloadFreshlead()" class="nav-item" role="presentation">
+                <a class="nav-link" id="freshlead-tab" data-bs-toggle="tab" href="#freshlead" role="tab"
+                    aria-controls="freshlead" aria-selected="false">Fresh Lead</a>
+            </li>
+
         </ul>
 
         <!-- Tab content -->
@@ -188,6 +193,7 @@
                                             <i data-feather="star"
                                                 class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
                                         </button>
+
                                     </div>
                                 </li>
                             @endif
@@ -223,6 +229,7 @@
                                             <span
                                                 class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
                                         @endif
+
                                         <button type="button"
                                             class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
                                             onclick="toggleStar('{{ $chat->uid }}', this)"
@@ -230,13 +237,20 @@
                                             <i data-feather="star"
                                                 class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
                                         </button>
+                                        <button type="button"
+                                            class="btn  {{ $chat->follow_up ? 'bg-danger' : '' }} p-0 star-btn float-end"
+                                            onclick="removeFollowup('{{ $chat->uid }}', this)"
+                                            title="{{ $chat->follow_up ? 'remove' : 'Mark as Starred' }}">
+                                            <i data-feather="trash-2"
+                                                class="cursor-pointer font-medium-2  {{ $chat->follow_up ? 'text-white' : 'text-secondary' }}"></i>
+                                        </button>
                                     </div>
                                 </li>
                             @endif
                         @endforeach
                     </ul>
                     <div class="pagination">
-                        {{ $starred_box->links() }}
+                        {{ $follow_up->links() }}
                     </div>
                 </div>
             </div>
@@ -266,6 +280,13 @@
                                                 class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
                                         @endif
                                         <button type="button"
+                                            class="btn  {{ $chat->under_contract ? 'bg-danger' : '' }} p-0 star-btn float-end"
+                                            onclick="removeUnderContract('{{ $chat->uid }}', this)"
+                                            title="{{ $chat->under_contract ? 'remove' : 'Mark as Starred' }}">
+                                            <i data-feather="trash-2"
+                                                class="cursor-pointer font-medium-2  {{ $chat->under_contract ? 'text-white' : 'text-secondary' }}"></i>
+                                        </button>
+                                        <button type="button"
                                             class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
                                             onclick="toggleStar('{{ $chat->uid }}', this)"
                                             title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
@@ -278,7 +299,55 @@
                         @endforeach
                     </ul>
                     <div class="pagination">
-                        {{ $starred_box->links() }}
+                        {{ $under_contract->links() }}
+                    </div>
+                </div>
+            </div>
+            <!-- Fresh Lead tab -->
+            <div class="tab-pane fade" id="freshlead" role="tabpanel" aria-labelledby="freshlead-tab">
+                <div id="freshlead-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
+                    <ul class="chat-users-list chat-list media-list">
+                        @foreach ($fresh_lead as $chat)
+                            @if ($chat->fresh_lead)
+                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
+                                    <span class="avatar">
+                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
+                                            width="54" alt="Avatar" />
+                                    </span>
+                                    <div class="chat-info flex-grow-1">
+                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
+                                        <p class="card-text text-truncate">
+                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
+                                        </p>
+                                    </div>
+                                    <div class="chat-meta text-nowrap">
+                                        <small
+                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
+                                        @if ($chat->notification)
+                                            <span
+                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
+                                        @endif
+                                        <button type="button"
+                                            class="btn  {{ $chat->fresh_lead ? 'bg-danger' : '' }} p-0 star-btn float-end"
+                                            onclick="removeFreshLead('{{ $chat->uid }}', this)"
+                                            title="{{ $chat->fresh_lead ? 'remove' : 'Mark as Starred' }}">
+                                            <i data-feather="trash-2"
+                                                class="cursor-pointer font-medium-2  {{ $chat->fresh_lead ? 'text-white' : 'text-secondary' }}"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
+                                            onclick="toggleStar('{{ $chat->uid }}', this)"
+                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
+                                            <i data-feather="star"
+                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            @endif
+                        @endforeach
+                    </ul>
+                    <div class="pagination">
+                        {{ $fresh_lead->links() }}
                     </div>
                 </div>
             </div>
@@ -297,16 +366,25 @@
             window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
+
         function reloadFollowup() {
             localStorage.setItem('activeTab', 'followup-tab');
-            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+            // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
+
         function reloadUndercontract() {
             localStorage.setItem('activeTab', 'undercontract-tab');
             window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
+
+        function reloadFreshlead() {
+            localStorage.setItem('activeTab', 'freshlead-tab');
+            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+
+        }
+
         window.onload = function() {
             const activeTab = localStorage.getItem('activeTab');
             const unreadTab = document.getElementById('unread-tab');
@@ -334,7 +412,6 @@
                 document.getElementById('read').classList.add('show', 'active');
             }
 
-            // Optionally remove activeTab from localStorage if needed
             localStorage.removeItem('activeTab');
         };
 
@@ -370,6 +447,66 @@
                         // Toggle the star icon
                     } else {
                         console.error('Error toggling star:', data.message);
+                    }
+                }).catch(error => console.error('Error:', error));
+        }
+
+        function removeFollowup(chatId, element) {
+            // Send AJAX request to toggle the starred status
+            fetch(`/chat-box/${chatId}/remove-followup`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.status == 'success') {
+                        console.log(data);
+                        location.reload()
+                        // Toggle the star icon
+                    } else {
+                        console.error('Error removing follow_up:', data.message);
+                    }
+                }).catch(error => console.error('Error:', error));
+        }
+
+        function removeFreshLead(chatId, element) {
+            // Send AJAX request to toggle the starred status
+            fetch(`/chat-box/${chatId}/remove-freshlead`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.status == 'success') {
+                        console.log(data);
+                        location.reload()
+                        // Toggle the star icon
+                    } else {
+                        console.error('Error removing fresh lead:', data.message);
+                    }
+                }).catch(error => console.error('Error:', error));
+        }
+
+        function removeUnderContract(chatId, element) {
+            // Send AJAX request to toggle the starred status
+            fetch(`/chat-box/${chatId}/remove-undercontract`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.status == 'success') {
+                        console.log(data);
+                        location.reload()
+                        // Toggle the star icon
+                    } else {
+                        console.error('Error removing under contract:', data.message);
                     }
                 }).catch(error => console.error('Error:', error));
         }
