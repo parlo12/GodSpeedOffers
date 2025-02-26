@@ -237,13 +237,13 @@
                                             <i data-feather="star"
                                                 class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
                                         </button>
-                                        <button type="button"
+                                        {{-- <button type="button"
                                             class="btn  {{ $chat->follow_up ? 'bg-danger' : '' }} p-0 star-btn float-end"
                                             onclick="removeFollowup('{{ $chat->uid }}', this)"
                                             title="{{ $chat->follow_up ? 'remove' : 'Mark as Starred' }}">
                                             <i data-feather="trash-2"
                                                 class="cursor-pointer font-medium-2  {{ $chat->follow_up ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
+                                        </button> --}}
                                     </div>
                                 </li>
                             @endif
@@ -287,13 +287,13 @@
                                             <i data-feather="star"
                                                 class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
                                         </button>
-                                        <button type="button"
+                                        {{-- <button type="button"
                                             class="btn  {{ $chat->under_contract ? 'bg-danger' : '' }} p-0 star-btn float-end"
                                             onclick="removeUnderContract('{{ $chat->uid }}', this)"
                                             title="{{ $chat->under_contract ? 'remove' : 'Mark as Starred' }}">
                                             <i data-feather="trash-2"
                                                 class="cursor-pointer font-medium-2  {{ $chat->under_contract ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
+                                        </button> --}}
                                     </div>
                                 </li>
                             @endif
@@ -336,13 +336,13 @@
                                             <i data-feather="star"
                                                 class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
                                         </button>
-                                        <button type="button"
+                                        {{-- <button type="button"
                                             class="btn  {{ $chat->fresh_lead ? 'bg-danger' : '' }} p-0 star-btn float-end"
                                             onclick="removeFreshLead('{{ $chat->uid }}', this)"
                                             title="{{ $chat->fresh_lead ? 'remove' : 'Mark as Starred' }}">
                                             <i data-feather="trash-2"
                                                 class="cursor-pointer font-medium-2  {{ $chat->fresh_lead ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
+                                        </button> --}}
                                     </div>
                                 </li>
                             @endif
