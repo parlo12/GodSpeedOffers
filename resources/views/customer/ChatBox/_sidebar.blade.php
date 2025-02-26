@@ -155,11 +155,13 @@
                                 </li>
                             @endif
                         @endforeach
+                        <br>
+                        <div class="pagination">
+                            {{ $unread_box->links() }}
+                        </div>
                     </ul>
                 </div>
-                <div class="pagination">
-                    {{ $unread_box->links() }}
-                </div>
+
             </div>
 
             <!-- Starred Tab -->
@@ -198,10 +200,11 @@
                                 </li>
                             @endif
                         @endforeach
+                        <br>
+                        <div class="pagination">
+                            {{ $starred_box->links() }}
+                        </div>
                     </ul>
-                    <div class="pagination">
-                        {{ $starred_box->links() }}
-                    </div>
                 </div>
             </div>
 
@@ -248,10 +251,12 @@
                                 </li>
                             @endif
                         @endforeach
+                        <br>
+                        <div class="pagination">
+                            {{ $follow_up->links() }}
+                        </div>
                     </ul>
-                    <div class="pagination">
-                        {{ $follow_up->links() }}
-                    </div>
+                 
                 </div>
             </div>
 
@@ -279,7 +284,7 @@
                                             <span
                                                 class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
                                         @endif
-                                        
+
                                         <button type="button"
                                             class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
                                             onclick="toggleStar('{{ $chat->uid }}', this)"
@@ -298,10 +303,12 @@
                                 </li>
                             @endif
                         @endforeach
+                        <br>
+                        <div class="pagination">
+                            {{ $under_contract->links() }}
+                        </div>
                     </ul>
-                    <div class="pagination">
-                        {{ $under_contract->links() }}
-                    </div>
+                 
                 </div>
             </div>
             <!-- Fresh Lead tab -->
@@ -328,7 +335,7 @@
                                             <span
                                                 class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
                                         @endif
-                                        
+
                                         <button type="button"
                                             class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
                                             onclick="toggleStar('{{ $chat->uid }}', this)"
@@ -347,10 +354,12 @@
                                 </li>
                             @endif
                         @endforeach
+                        <br>
+                        <div class="pagination">
+                            {{ $fresh_lead->links() }}
+                        </div>
                     </ul>
-                    <div class="pagination">
-                        {{ $fresh_lead->links() }}
-                    </div>
+                 
                 </div>
             </div>
         </div>
