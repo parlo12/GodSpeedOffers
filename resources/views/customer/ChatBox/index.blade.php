@@ -133,7 +133,6 @@
                             title="{{ __('locale.buttons.delete') }}"><i data-feather="trash"
                                 class="cursor-pointer font-medium-2 text-danger"></i>
                         </span>
-
                     </div>
                 </header>
             </div>
@@ -539,7 +538,6 @@
                     <option value="follow_up">Follow Up</option>
                     <option value="under_contract">Under Contract</option>
                     <option value="fresh_lead">Fresh Lead</option>
-
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Add To Pipeline</button>
