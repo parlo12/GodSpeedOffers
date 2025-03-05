@@ -5,11 +5,7 @@
         </span>
         <div class="chat-info flex-grow-1">
             <h6 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h6>
-            {{-- @if(!empty($chat->contact) && !empty($chat->contact->getFullName()))
-                <p class="card-text mb-0 text-truncate">
-                    {{ str_limit($chat->contact->getFullName(), 15) }}
-                </p>
-            @endif --}}
+           
             <p class="card-text mb-0 text-truncate">
                 {{ $chat->from }}
             </p>
