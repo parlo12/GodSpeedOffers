@@ -44,5 +44,9 @@
         {
             $this->belongsTo(ChatBoxMessage::class, 'box_id', 'id');
         }
+        public function contact()
+        {
+            return $this->belongsTo(Contacts::class, 'to', 'phone');
+        }
 
     }

@@ -62,68 +62,24 @@ class ChatBoxController extends Controller
         $pageConfigs = [
             'pageHeader'    => false,
             'contentLayout' => 'content-left-sidebar',
-            'pageClass'     => 'chat-application',
+            'pageClass'     => 'chat-application font-small-3',
         ];
 
-        // Get the current page, default is 1
-        $currentPage = request()->get('page', 1);
+        $pinnedChats = ChatBox::where('user_id', Auth::id())
+        ->where('reply_by_customer', true)
+            ->where('is_starred', 1)
+            ->with(['chatBoxMessages', 'contact'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-        // Paginate the chat boxes (10 items per page as an example)
-        $chat_box = ChatBox::where('user_id', Auth::user()->id)
-            ->select('uid', 'id', 'to', 'from', 'updated_at', 'notification', 'is_starred')
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(500);
-
-        // Count unread messages
-        $unread_count = ChatBox::where('notification', '>', 0)
-            ->where('reply_by_customer', true)
-            ->where('user_id', Auth::user()->id)
-            ->count();
-        $unread_chat = ChatBox::where('user_id', Auth::user()->id)
-            ->where('notification', '>', 0)
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(500);
-        // Get templates
-        $starred_chats = ChatBox::where('user_id', Auth::user()->id)
-            ->where('is_starred', true)
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(500);
-        $follow_up = ChatBox::where('user_id', Auth::user()->id)
-            ->orWhere('pipeline_user', Auth::user()->id)
-            ->where('follow_up', true)
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(500);
-        $under_contract = ChatBox::where('user_id', Auth::user()->id)
-            ->orWhere('pipeline_user', Auth::user()->id)
-            ->where('under_contract', true)
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(500);
-        $fresh_lead = ChatBox::where('user_id', Auth::user()->id)
-            ->orWhere('pipeline_user', Auth::user()->id)
-            ->where('fresh_lead', true)
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(500);
         $templates = Templates::where('status', true)->where('user_id', auth()->user()->id)->get();
 
         return view('customer.ChatBox.index', [
             'pageConfigs' => $pageConfigs,
-            'chat_box'    => $chat_box,
             'templates'   => $templates,
-            'unread_box' => $unread_chat,
-            'unread_chats' => $unread_count,
-            'starred_box' =>  $starred_chats,
-            'follow_up' =>  $follow_up,
-            'under_contract' =>  $under_contract,
-            'fresh_lead'=>$fresh_lead
+            'pinnedChats' => $pinnedChats,
         ]);
     }
-
 
     public function refresh_sidebar(): JsonResponse
     {
@@ -132,10 +88,10 @@ class ChatBoxController extends Controller
             ->where('user_id', Auth::user()->id)
             ->count();
 
-        $chat_box = ChatBox::where('user_id', Auth::user()->id)
-            ->where('reply_by_customer', true)
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        // $chat_box = ChatBox::where('user_id', Auth::user()->id)
+        //     ->where('reply_by_customer', true)
+        //     ->orderBy('updated_at', 'desc')
+        //     ->get();
 
         // $unread_chat = ChatBox::where('user_id', Auth::user()->id)
         //     ->where('notification', '>', 0)
@@ -147,7 +103,6 @@ class ChatBoxController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'chat_box' => $chat_box,
             'unread_chats' => $unread_count
         ]);
     }
@@ -532,9 +487,10 @@ class ChatBoxController extends Controller
             ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
             ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
             ->toArray();
-        $timezone = Auth::user()->timezone ?? config('app.timezone');
+
         $data = array_map(function ($message) use ($timezone) {
             $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
+
             return $message;
         }, $data);
 
@@ -543,6 +499,7 @@ class ChatBoxController extends Controller
         return response()->json([
             'status' => 'success',
             'data'   => $jsonData,
+            'starred' => $box->is_starred,
         ]);
     }
     /**
@@ -976,6 +933,72 @@ class ChatBoxController extends Controller
 
         // Return the formatted results as JSON
         return response()->json($formattedResults);
+    }
+      /**
+     * @throws Throwable
+     */
+    public function loadChatUsers(Request $request)
+    {
+        $filter = $request->get('filter', 'recents');
+        $search = $request->get('search', '');
+        $page   = $request->get('page', 1);
+
+        // Start the base query
+        $query = ChatBox::where('user_id', Auth::id())->where('is_starred', false);
+
+        // Apply the filter using switch
+        switch ($filter) {
+            case 'unread':
+                $query->where('notification', '>', 0);
+                break;
+            case 'read':
+                $query->where('notification', '=', 0);
+                break;
+            case 'fresh-leads':
+                $query->where('fresh_lead', true);
+                break;
+            case 'under-contracts':
+                $query->where('under_contract', true);
+                break;
+            case 'follow-ups':
+                $query->where('follow_up', true);
+                break;
+            case 'recents':
+                $query->orderBy('updated_at', 'desc');
+                break;
+                // 'all' case or any other value does not modify the query
+        }
+
+        // Apply the search if provided
+        if (! empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('from', 'LIKE', "%{$search}%")
+                    ->orWhere('to', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->with(['chatBoxMessages', 'contact']);
+
+
+        // Paginate the results, limiting to 10 per page
+        $chat_box = $query->paginate(10, ['*'], 'page', $page);
+
+
+        return view('customer.ChatBox.partials._chat_list', compact('chat_box'))->render();
+    }
+      /**
+     * add to star
+     */
+    public function pin(ChatBox $box): JsonResponse
+    {
+        $box->update([
+            'is_starred' => ! $box->is_starred,
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => $box->is_starred?"Added to pinned":"Removed from pinned",
+        ]);
     }
 
     private function fetchWakeTime($assistant_id)
