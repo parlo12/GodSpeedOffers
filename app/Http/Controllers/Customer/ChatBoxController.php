@@ -66,7 +66,7 @@ class ChatBoxController extends Controller
         ];
 
         $pinnedChats = ChatBox::where('user_id', Auth::id())
-        ->where('reply_by_customer', true)
+            ->where('reply_by_customer', true)
             ->where('is_starred', 1)
             ->with(['chatBoxMessages', 'contact'])
             ->orderBy('updated_at', 'desc')
@@ -99,7 +99,7 @@ class ChatBoxController extends Controller
         //     ->orderBy('updated_at', 'desc')
         //     ->get();
 
-        
+
 
         return response()->json([
             'status' => 'success',
@@ -327,11 +327,11 @@ class ChatBoxController extends Controller
     {
         $userId = $request->input('user_id');
         $chat_id = $request->input('chat_id');
-        $pipeline=$request->input('pipeline');
-        $crm_user=$request->input('crm_user');
+        $pipeline = $request->input('pipeline');
+        $crm_user = $request->input('crm_user');
         $chat_box = ChatBox::firstWhere('uid', $chat_id);
         $chat_box->$pipeline = 1;
-        $chat_box->pipeline_user=$crm_user;
+        $chat_box->pipeline_user = $crm_user;
         $chat_box->save();
         $data = ChatBoxMessage::where('box_id', $chat_box->id)
             ->orderBy('created_at')
@@ -347,14 +347,12 @@ class ChatBoxController extends Controller
         }, $data);
 
         $messages = json_encode($data, true);
-        if($pipeline=="follow_up"){
+        if ($pipeline == "follow_up") {
             $this->follow_up_lead($chat_box->to, $userId, $messages);
-        }
-        else if($pipeline=="under_contract"){
-            $this->under_contract_lead( $chat_box->to, $userId,$messages);
-        }
-        else{
-            $this->fresh_lead( $chat_box->to, $userId,$messages);
+        } else if ($pipeline == "under_contract") {
+            $this->under_contract_lead($chat_box->to, $userId, $messages);
+        } else {
+            $this->fresh_lead($chat_box->to, $userId, $messages);
         }
         return response()->json([
             'status'  => 'success',
@@ -424,12 +422,12 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update lead status.'], $response->status());
         }
     }
-    private function follow_up_lead($phone, $user_id,$messages)
+    private function follow_up_lead($phone, $user_id, $messages)
     {
         $response = Http::get('https://internaltools.godspeedoffers.com/api/follow_up', [
             'phone' => $phone,
             'user_id' => $user_id,
-            'messages'=>$messages
+            'messages' => $messages
         ]);
 
         if ($response->successful()) {
@@ -438,12 +436,12 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
         }
     }
-    private function under_contract_lead($phone, $user_id,$messages)
+    private function under_contract_lead($phone, $user_id, $messages)
     {
         $response = Http::get('https://internaltools.godspeedoffers.com/api/under_contract', [
             'phone' => $phone,
             'user_id' => $user_id,
-            'messages'=>$messages
+            'messages' => $messages
         ]);
 
         if ($response->successful()) {
@@ -453,12 +451,12 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update under contract status.'], $response->status());
         }
     }
-    private function fresh_lead($phone, $user_id,$messages)
+    private function fresh_lead($phone, $user_id, $messages)
     {
         $response = Http::get('https://internaltools.godspeedoffers.com/api/fresh_lead', [
             'phone' => $phone,
             'user_id' => $user_id,
-            'messages'=>$messages
+            'messages' => $messages
         ]);
 
         if ($response->successful()) {
@@ -526,7 +524,7 @@ class ChatBoxController extends Controller
             ]
         );
     }
-      /**
+    /**
      * remove followup
      */
     public function remove_followup(ChatBox $box): JsonResponse
@@ -540,7 +538,7 @@ class ChatBoxController extends Controller
             ]
         );
     }
-       /**
+    /**
      * remove undercontract
      */
     public function remove_undercontract(ChatBox $box): JsonResponse
@@ -554,7 +552,7 @@ class ChatBoxController extends Controller
             ]
         );
     }
-        /**
+    /**
      * remove freshlead
      */
     public function remove_freshlead(ChatBox $box): JsonResponse
@@ -600,7 +598,7 @@ class ChatBoxController extends Controller
                 }
             }
         }
-        $crm_users=User::all();
+        $crm_users = User::all();
         return response()->json([
             'status' => 'success',
             'group_id'   => $contact_group_id,
@@ -608,7 +606,7 @@ class ChatBoxController extends Controller
             'first_name' => $first_name,
             'last_name' => $last_name,
             'user_and_orgs' => $this->fetchUsersAndOrgs()->original,
-            'crm_users'=>$crm_users
+            'crm_users' => $crm_users
         ]);
     }
 
@@ -934,7 +932,7 @@ class ChatBoxController extends Controller
         // Return the formatted results as JSON
         return response()->json($formattedResults);
     }
-      /**
+    /**
      * @throws Throwable
      */
     public function loadChatUsers(Request $request)
@@ -944,15 +942,27 @@ class ChatBoxController extends Controller
         $page   = $request->get('page', 1);
 
         // Start the base query
-        $query = ChatBox::where('user_id', Auth::id())->where('is_starred', false);
+        $query = ChatBox::where(function ($q) {
+            $q->where('user_id', Auth::id())
+                ->orWhere('pipeline_user', Auth::id());
+        });
 
         // Apply the filter using switch
         switch ($filter) {
             case 'unread':
-                $query->where('notification', '>', 0);
+                $query->where('notification', '>', 0)
+                    ->where('is_starred', false)
+                    ->where('follow_up', false)
+                    ->where('fresh_lead', false)
+                    ->where('under_contract', false);
+
                 break;
             case 'read':
-                $query->where('notification', '=', 0);
+                $query->where('notification', '=', 0)
+                    ->where('is_starred', false)
+                    ->where('follow_up', false)
+                    ->where('fresh_lead', false)
+                    ->where('under_contract', false);
                 break;
             case 'fresh-leads':
                 $query->where('fresh_lead', true);
@@ -964,29 +974,32 @@ class ChatBoxController extends Controller
                 $query->where('follow_up', true);
                 break;
             case 'recents':
-                $query->orderBy('updated_at', 'desc');
+                $query->where('is_starred', false)
+                    ->where('follow_up', false)
+                    ->where('fresh_lead', false)
+                    ->where('under_contract', false)
+                    ->orderBy('updated_at', 'desc'); // Order by should be last
                 break;
-                // 'all' case or any other value does not modify the query
         }
 
         // Apply the search if provided
-        if (! empty($search)) {
+        if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('from', 'LIKE', "%{$search}%")
                     ->orWhere('to', 'LIKE', "%{$search}%");
             });
         }
 
+        // Load relationships
         $query->with(['chatBoxMessages', 'contact']);
 
-
-        // Paginate the results, limiting to 10 per page
+        // Paginate results, limiting to 10 per page
         $chat_box = $query->paginate(10, ['*'], 'page', $page);
-
 
         return view('customer.ChatBox.partials._chat_list', compact('chat_box'))->render();
     }
-      /**
+
+    /**
      * add to star
      */
     public function pin(ChatBox $box): JsonResponse
@@ -997,7 +1010,7 @@ class ChatBoxController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => $box->is_starred?"Added to pinned":"Removed from pinned",
+            'message' => $box->is_starred ? "Added to pinned" : "Removed from pinned",
         ]);
     }
 
