@@ -2,6 +2,100 @@
 
 All notable changes to `laravel-translatable` will be documented in this file
 
+## 6.11.3 - 2025-02-14
+
+### What's Changed
+
+* Allow null value in translations if allowNullForTranslation is true by @dont-know-php in https://github.com/spatie/laravel-translatable/pull/488
+
+### New Contributors
+
+* @dont-know-php made their first contribution in https://github.com/spatie/laravel-translatable/pull/488
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.10.2...6.11.3
+
+## 6.10.2 - 2025-02-03
+
+### What's Changed
+
+* Fix casts on initialization of HasTranslation by @thaqebon in https://github.com/spatie/laravel-translatable/pull/486
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.10.1...6.10.2
+
+## 6.10.1 - 2025-01-31
+
+### What's Changed
+
+* Handle null database values as null in translations by @alipadron in https://github.com/spatie/laravel-translatable/pull/479
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.10.0...6.10.1
+
+## 6.10.0 - 2025-01-31
+
+### What's Changed
+
+* Support clearing translations using an empty array by @alipadron in https://github.com/spatie/laravel-translatable/pull/478
+* Bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 by @dependabot in https://github.com/spatie/laravel-translatable/pull/484
+* Add support for nested key translations by @thaqebon in https://github.com/spatie/laravel-translatable/pull/483
+
+### New Contributors
+
+* @thaqebon made their first contribution in https://github.com/spatie/laravel-translatable/pull/483
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.9.3...6.10.0
+
+## 6.9.3 - 2024-12-16
+
+### What's Changed
+
+* Revert return value change when column value is `null` by @vencelkatai in https://github.com/spatie/laravel-translatable/pull/474
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.9.2...6.9.3
+
+## 6.9.2 - 2024-12-11
+
+### What's Changed
+
+* Improve `setAttribute` to handle array list as value for translation by @alipadron in https://github.com/spatie/laravel-translatable/pull/469
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.9.1...6.9.2
+
+## 6.9.1 - 2024-12-11
+
+### What's Changed
+
+* Fix attribute mutators by @vencelkatai in https://github.com/spatie/laravel-translatable/pull/470
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.9.0...6.9.1
+
+## 6.9.0 - 2024-12-09
+
+### What's Changed
+
+* PHP 8.4 deprecates implicitly nullable parameter types. by @selfsimilar in https://github.com/spatie/laravel-translatable/pull/458
+* Add .idea to .gitignore, PHP CS Fixer to dev dependencies, and rename PHP CS Fixer config by @alipadron in https://github.com/spatie/laravel-translatable/pull/466
+* Allow configuration for handling null and empty strings in translations (Fixes #456) by @alipadron in https://github.com/spatie/laravel-translatable/pull/465
+
+### New Contributors
+
+* @selfsimilar made their first contribution in https://github.com/spatie/laravel-translatable/pull/458
+* @alipadron made their first contribution in https://github.com/spatie/laravel-translatable/pull/466
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.8.0...6.9.0
+
+## 6.8.0 - 2024-07-24
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.1.0 to 2.2.0 by @dependabot in https://github.com/spatie/laravel-translatable/pull/453
+* Added operand for json scopes by @rcerljenko in https://github.com/spatie/laravel-translatable/pull/454
+
+### New Contributors
+
+* @rcerljenko made their first contribution in https://github.com/spatie/laravel-translatable/pull/454
+
+**Full Changelog**: https://github.com/spatie/laravel-translatable/compare/6.7.1...6.8.0
+
 ## 6.7.1 - 2024-05-14
 
 ### What's Changed

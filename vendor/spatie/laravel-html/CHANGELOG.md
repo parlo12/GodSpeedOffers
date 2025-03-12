@@ -2,6 +2,26 @@
 
 All notable changes to `laravel-html` will be documented in this file.
 
+## 3.11.2 - 2025-02-05
+
+### What's Changed
+
+* Radio buttons with value 0 are incorrectly marked as checked by @acarpio89 in https://github.com/spatie/laravel-html/pull/249
+
+### New Contributors
+
+* @acarpio89 made their first contribution in https://github.com/spatie/laravel-html/pull/249
+
+**Full Changelog**: https://github.com/spatie/laravel-html/compare/3.11.1...3.11.2
+
+## 3.11.1 - 2024-10-18
+
+### What's Changed
+
+* fix: Passing null to parameter #1 ($string) of type string is deprecated by @francoism90 in https://github.com/spatie/laravel-html/pull/244
+
+**Full Changelog**: https://github.com/spatie/laravel-html/compare/3.11.0...3.11.1
+
 ## 3.11.0 - 2024-07-16
 
 ### What's Changed

@@ -1,5 +1,183 @@
 # CHANGELOG
 
+## 1.8.2248 - 2025-3-12
+- Unified upgrade SDK.
+
+
+## 1.8.2247 - 2025-3-11
+- Generated 2019-01-23 for `Drds`.
+
+
+## 1.8.2246 - 2025-3-3
+- Add auto grouping apis.
+
+
+## 1.8.2245 - 2025-2-11
+- Generated 2020-06-01 for `SWAS-OPEN`.
+
+
+## 1.8.2244 - 2025-2-11
+- Generated 2019-03-07 for `Cloudauth`.
+
+
+## 1.8.2243 - 2025-2-7
+- Add ModifyInstanceProperties.
+
+
+## 1.8.2242 - 2025-2-6
+- Rebuild.
+
+
+## 1.8.2241 - 2025-1-20
+- Generated 2017-08-01 for `polardb`.
+
+
+## 1.8.2240 - 2025-1-14
+- Generated 2023-01-20 for `csas`.
+
+
+## 1.8.2239 - 2025-1-9
+- Supported GetInstanceLicense.
+
+
+## 1.8.2238 - 2025-1-8
+- Modify BatchGetMediaInfos.
+
+
+## 1.8.2237 - 2024-12-30
+- Add SmartQ APIs.
+- Add GetDataSourceConnectionInfo, QueryDatasetList APIs.
+
+
+## 1.8.2236 - 2024-12-26
+- CreateJob and UpdateJob support ExecutorBlockStrategy.
+- TimeType support fixed_delay.
+- ListJobs support return LastExecuteEndTime, LastExecuteStatus and CurrentExecuteStatus.
+
+
+## 1.8.2235 - 2024-12-25
+-- Supported DeleteEip
+
+
+## 1.8.2234 - 2024-12-24
+- Supported Jumbo for HDENI and LENI.
+
+
+## 1.8.2233 - 2024-12-23
+- Generated 2020-06-16 for `Alb`.
+
+
+## 1.8.2232 - 2024-12-19
+- Add BatchGetMediaInfos.
+- Modify UploadStreamByURL.
+
+
+## 1.8.2231 - 2024-12-18
+- Add Support Real time mock table.
+
+
+## 1.8.2230 - 2024-12-12
+- Supported Pageable of ListDataLakeDatabase API.
+
+
+## 1.8.2229 - 2024-12-11
+- Support fromData for UpdateRulesAttribute and Createrules
+
+
+## 1.8.2228 - 2024-12-6
+- Generated 2016-11-01 for `live`.
+
+
+## 1.8.2227 - 2024-12-6
+-Release GetJobDetail, ListJobInfo.
+-Modify GetTranscodeTask.
+
+
+## 1.8.2226 - 2024-12-2
+- Add LabelPriorityLevel in UpdateModelFeature API.
+
+
+## 1.8.2225 - 2024-11-28
+- SubmitTranscodeJobs Add SessionId.
+
+
+## 1.8.2224 - 2024-11-27
+- Generated 2017-11-10 for `Ens`.
+
+
+## 1.8.2223 - 2024-11-26
+- Add SmartqQueryAbility api.
+
+
+## 1.8.2222 - 2024-11-26
+- Update DescribeApiMetering API.
+
+
+## 1.8.2221 - 2024-11-22
+- Generated 2021-11-11 for `qianzhou`.
+
+
+## 1.8.2220 - 2024-11-19
+- Init.
+
+
+## 1.8.2219 - 2024-11-14
+- Generated 2016-11-01 for `live`.
+
+
+## 1.8.2218 - 2024-11-13
+- Supported AndroidMessageOppoCategory, AndroidMessageOppoNotifyLevel for Push and MassPush.
+
+
+## 1.8.2217 - 2024-11-5
+- Generated 2015-12-01 for `Dds`.
+
+
+## 1.8.2216 - 2024-11-4
+- Support Ipv4LocalAddresses and Ipv6LocalAddresses.
+
+
+## 1.8.2215 - 2024-10-31
+- DescribeInstanceTypes add CpuOptions.
+
+
+## 1.8.2214 - 2024-10-30
+- Update to support new apis.
+
+
+## 1.8.2213 - 2024-10-30
+- Update to support new apis.
+
+
+## 1.8.2212 - 2024-10-30
+- Generated 2023-01-20 for `csas`.
+
+
+## 1.8.2211 - 2024-10-30
+- Support describe and modify NVMe on instance.
+
+
+## 1.8.2210 - 2024-10-28
+- Support Fileset for BmCPFS.
+- Support Fileset Quota for BmCPFS.
+
+
+## 1.8.2209 - 2024-10-25
+- Generated 2017-11-10 for `Ens`.
+
+
+## 1.8.2208 - 2024-10-24
+- Publish sdk.
+
+
+## 1.8.2207 - 2024-10-23
+- Update Endpoint.
+
+
+## 1.8.2206 - 2024-10-23
+ListUsers，ListUserBasicInfos api新增支持status字段
+
+
 ## 1.8.2205 - 2024-10-22
 - Add openapi StartEaiJupyter.
 - Add openapi StopEaiJupyter.

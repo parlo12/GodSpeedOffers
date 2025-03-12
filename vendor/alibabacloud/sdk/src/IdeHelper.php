@@ -7,6 +7,7 @@ namespace AlibabaCloud;
  *
  * @codeCoverageIgnore
  *
+ * @method static AIMath\AIMath aIMath()
  * @method static ARMS\ARMS aRMS()
  * @method static ARMS4FINANCE\ARMS4FINANCE aRMS4FINANCE()
  * @method static Aas\Aas aas()
@@ -117,6 +118,7 @@ namespace AlibabaCloud;
  * @method static Eflo\Eflo eflo()
  * @method static EfloController\EfloController efloController()
  * @method static EhpcInstant\EhpcInstant ehpcInstant()
+ * @method static Eiam\Eiam eiam()
  * @method static Eipanycast\Eipanycast eipanycast()
  * @method static Elasticsearch\Elasticsearch elasticsearch()
  * @method static Emap\Emap emap()
@@ -158,6 +160,7 @@ namespace AlibabaCloud;
  * @method static Imarketing\Imarketing imarketing()
  * @method static Imgsearch\Imgsearch imgsearch()
  * @method static Imm\Imm imm()
+ * @method static Ims\Ims ims()
  * @method static IndustryBrain\IndustryBrain industryBrain()
  * @method static Iot\Iot iot()
  * @method static Iqa\Iqa iqa()
@@ -211,6 +214,7 @@ namespace AlibabaCloud;
  * @method static Ots\Ots ots()
  * @method static OutboundBot\OutboundBot outboundBot()
  * @method static PTS\PTS pTS()
+ * @method static PaiFeatureStore\PaiFeatureStore paiFeatureStore()
  * @method static PetaData\PetaData petaData()
  * @method static Polardb\Polardb polardb()
  * @method static Polardbx\Polardbx polardbx()
@@ -219,6 +223,7 @@ namespace AlibabaCloud;
  * @method static ProductCatalog\ProductCatalog productCatalog()
  * @method static Push\Push push()
  * @method static Pvtz\Pvtz pvtz()
+ * @method static Qianzhou\Qianzhou qianzhou()
  * @method static Qualitycheck\Qualitycheck qualitycheck()
  * @method static QuickbiPublic\QuickbiPublic quickbiPublic()
  * @method static Quotas\Quotas quotas()
@@ -243,6 +248,7 @@ namespace AlibabaCloud;
  * @method static SasApi\SasApi sasApi()
  * @method static Sasti\Sasti sasti()
  * @method static Scdn\Scdn scdn()
+ * @method static SchedulerX3\SchedulerX3 schedulerX3()
  * @method static Schedulerx2\Schedulerx2 schedulerx2()
  * @method static Scsp\Scsp scsp()
  * @method static Sddp\Sddp sddp()

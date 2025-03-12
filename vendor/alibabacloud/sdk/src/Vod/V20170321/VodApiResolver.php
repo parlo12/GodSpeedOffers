@@ -15,6 +15,7 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method AddVodTemplate addVodTemplate(array $options = [])
  * @method AddWatermark addWatermark(array $options = [])
  * @method AttachAppPolicyToIdentity attachAppPolicyToIdentity(array $options = [])
+ * @method BatchGetMediaInfos batchGetMediaInfos(array $options = [])
  * @method BatchSetVodDomainConfigs batchSetVodDomainConfigs(array $options = [])
  * @method BatchStartVodDomain batchStartVodDomain(array $options = [])
  * @method BatchStopVodDomain batchStopVodDomain(array $options = [])
@@ -45,6 +46,7 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DeleteVodSpecificConfig deleteVodSpecificConfig(array $options = [])
  * @method DeleteVodTemplate deleteVodTemplate(array $options = [])
  * @method DeleteWatermark deleteWatermark(array $options = [])
+ * @method DescribeMediaDistribution describeMediaDistribution(array $options = [])
  * @method DescribePlayTopVideos describePlayTopVideos(array $options = [])
  * @method DescribePlayUserAvg describePlayUserAvg(array $options = [])
  * @method DescribePlayUserTotal describePlayUserTotal(array $options = [])
@@ -100,6 +102,7 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method GetEditingProjectMaterials getEditingProjectMaterials(array $options = [])
  * @method GetImageInfo getImageInfo(array $options = [])
  * @method GetImageInfos getImageInfos(array $options = [])
+ * @method GetJobDetail getJobDetail(array $options = [])
  * @method GetMediaAuditAudioResultDetail getMediaAuditAudioResultDetail(array $options = [])
  * @method GetMediaAuditResult getMediaAuditResult(array $options = [])
  * @method GetMediaAuditResultDetail getMediaAuditResultDetail(array $options = [])
@@ -127,6 +130,7 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method ListAppPoliciesForIdentity listAppPoliciesForIdentity(array $options = [])
  * @method ListAuditSecurityIp listAuditSecurityIp(array $options = [])
  * @method ListDynamicImage listDynamicImage(array $options = [])
+ * @method ListJobInfo listJobInfo(array $options = [])
  * @method ListLiveRecordVideo listLiveRecordVideo(array $options = [])
  * @method ListSnapshots listSnapshots(array $options = [])
  * @method ListTranscodeTask listTranscodeTask(array $options = [])
@@ -366,6 +370,14 @@ class AddWatermark extends Rpc
  * @method $this withAppId($value)
  */
 class AttachAppPolicyToIdentity extends Rpc
+{
+}
+
+/**
+ * @method string getMediaIds()
+ * @method $this withMediaIds($value)
+ */
+class BatchGetMediaInfos extends Rpc
 {
 }
 
@@ -785,6 +797,23 @@ class DeleteVodTemplate extends Rpc
  */
 class DeleteWatermark extends Rpc
 {
+}
+
+/**
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
+ * @method string getStorageClass()
+ * @method $this withStorageClass($value)
+ * @method string getInterval()
+ * @method $this withInterval($value)
+ */
+class DescribeMediaDistribution extends Rpc
+{
+
+    /** @var string */
+    public $scheme = 'https';
 }
 
 /**
@@ -1741,6 +1770,16 @@ class GetImageInfos extends Rpc
 }
 
 /**
+ * @method string getJobType()
+ * @method $this withJobType($value)
+ * @method string getJobId()
+ * @method $this withJobId($value)
+ */
+class GetJobDetail extends Rpc
+{
+}
+
+/**
  * @method string getResourceOwnerId()
  * @method $this withResourceOwnerId($value)
  * @method string getResourceOwnerAccount()
@@ -1890,6 +1929,8 @@ class GetTranscodeSummary extends Rpc
 /**
  * @method string getTranscodeTaskId()
  * @method $this withTranscodeTaskId($value)
+ * @method string getJobIds()
+ * @method $this withJobIds($value)
  */
 class GetTranscodeTask extends Rpc
 {
@@ -2076,6 +2117,16 @@ class ListAuditSecurityIp extends Rpc
  * @method $this withVideoId($value)
  */
 class ListDynamicImage extends Rpc
+{
+}
+
+/**
+ * @method string getMediaId()
+ * @method $this withMediaId($value)
+ * @method string getJobType()
+ * @method $this withJobType($value)
+ */
+class ListJobInfo extends Rpc
 {
 }
 
@@ -2689,6 +2740,8 @@ class SubmitSnapshotJob extends Rpc
 }
 
 /**
+ * @method string getSessionId()
+ * @method $this withSessionId($value)
  * @method string getUserData()
  * @method $this withUserData($value)
  * @method string getVideoId()
@@ -2845,6 +2898,8 @@ class UpdateTranscodeTemplateGroup extends Rpc
  * @method $this withTitle($value)
  * @method string getCoverURL()
  * @method $this withCoverURL($value)
+ * @method string getUserData()
+ * @method $this withUserData($value)
  * @method string getDownloadSwitch()
  * @method $this withDownloadSwitch($value)
  * @method string getCateId()
@@ -2951,6 +3006,8 @@ class UploadMediaByURL extends Rpc
  * @method $this withStreamURL($value)
  * @method string getMediaId()
  * @method $this withMediaId($value)
+ * @method string getUploadMetadata()
+ * @method $this withUploadMetadata($value)
  */
 class UploadStreamByURL extends Rpc
 {

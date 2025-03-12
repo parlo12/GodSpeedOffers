@@ -1,9 +1,27 @@
 # Change Log
+
+## [4.66.5](https://github.com/plivo/plivo-php/tree/v4.66.5) (2025-02-25)
+**Enhancement - Supporting parameter_name in WhatsApp Template .**
+- Supporting `parameter_name` in WhatsApp Template .
+
+## [4.66.4](https://github.com/plivo/plivo-php/tree/v4.66.4) (2025-02-18)
+**Enhancement**
+-Handle the error response from the send sms api
+
+## [4.66.3](https://github.com/plivo/plivo-php/tree/v4.66.3) (2024-11-08)
+**Bug fix**
+-Fix subsquent requests to other services after a lookup request
+
+## [4.66.2](https://github.com/plivo/plivo-php/tree/v4.66.2) (2024-10-23)
+**Feature - FraudCheck param in Create, Get and List Session**
+- Support for the `fraud_check` parameter in sms verify session request
+- Added support for `fraud_check` in GET and LIST verify session.
+
 ## [4.66.1](https://github.com/plivo/plivo-php/tree/v4.66.1)(2024-10-10)
 **Feature - Dtmf param in Create, Get and List Session**
 - Support for the `dtmf` parameter in voice verify session request
 - Added support for `dtmf` in GET and LIST verify session.
-- 
+
 ## [4.66.0](https://github.com/plivo/plivo-php/tree/v4.66.0)(2024-09-30)
 **Feature - Adding new param support for Number Masking session with single party **
 - Added `create_session_with_single_party`, `virtual_number_cooloff_period` and `force_pin_authentication` attributes in Masking Session
