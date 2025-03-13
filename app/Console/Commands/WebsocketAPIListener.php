@@ -33,18 +33,22 @@ class WebsocketAPIListener extends Command
         $sendingServers = SendingServer::where('settings', SendingServer::TYPE_WEBSOCKETAPI)->get();
 
         foreach ($sendingServers as $server) {
-            // If settings is a string (likely JSON), decode it.
-            $settings = is_string($server->settings) ? json_decode($server->settings, true) : $server->settings;
-            if ($settings === null) {
-                Log::warning("Invalid JSON for settings on server ID: {$server->id}");
-                continue;
+            // Decode settings if it is a string (likely JSON)
+            if (is_string($server->settings)) {
+                $decodedSettings = json_decode($server->settings, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    Log::warning("Invalid JSON in settings for server ID: {$server->id}");
+                    continue;
+                }
+            } else {
+                $decodedSettings = $server->settings;
             }
-            // Set api_link and auth_token from the decoded settings.
-            $server->api_link = $settings['api_link'] ?? null;
-            $server->auth_token = $settings['auth_token'] ?? null;
+
+            $server->api_link = $decodedSettings['api_link'] ?? null;
+            $server->auth_token = $decodedSettings['auth_token'] ?? null;
         }
 
-        Log::info('all sending servers: ' . json_encode($sendingServers));
+        Log::info('All sending servers: ' . json_encode($sendingServers));
 
         // Pull the first sending server.
         $sendingServer = $sendingServers->first();
@@ -59,7 +63,7 @@ class WebsocketAPIListener extends Command
                 $client = Client::create($sendingServer->api_link . '?apiKey=' . $sendingServer->auth_token);
                 $client->connect();
                 $this->info('Connected to Websocket API');
-                Log::info('Connected to Websocket API, Process ID: ' . getmypid());
+                Log::info('Connected to Websocket API. Process ID: ' . getmypid());
                 Log::info('Current API Link: ' . $sendingServer->api_link);
             } catch (\Exception $e) {
                 $this->error("Failed to connect to server ID: {$sendingServer->id}. Error: " . $e->getMessage());
