@@ -31,7 +31,16 @@ class WebsocketAPIListener extends Command
      */
     public function handle()
     {
-        $sendingServer = SendingServer::where('settings', SendingServer::TYPE_WEBSOCKETAPI)->first();
+        $sendingServer = SendingServer::where('settings', SendingServer::TYPE_WEBSOCKETAPI)->get();
+        foreach ($sendingServer as $server) {
+            $server->api_link = $server->settings['api_link'];
+            $server->auth_token = $server->settings['auth_token'];
+        }
+        Log::info('all sending servers: ' . json_encode($sendingServer));
+        // pull the first sending server
+        $sendingServer = $sendingServer->first();
+        
+        
         if ($sendingServer) {
            $client = Client::create($sendingServer->api_link . '?apiKey=' . $sendingServer->auth_token);
             $client->connect();
