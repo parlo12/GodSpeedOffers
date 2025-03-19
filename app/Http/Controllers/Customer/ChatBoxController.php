@@ -710,6 +710,7 @@ class ChatBoxController extends Controller
     {
         $box->fresh_lead = 0;
         $box->save();
+        Log::info("freshlead set to $box->fresh_lead");
         return response()->json(
             [
                 'status' => 'success',
