@@ -1,15 +1,19 @@
+@php
+    use App\Helpers\Helper;
+    use App\Library\Tool;
+@endphp
 @foreach ($chat_box as $chat)
     <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
         <span class="avatar">
             <img src="{{ asset('images/profile/profile.jpg') }}" height="36" width="54" alt="Avatar" />
         </span>
         <div class="chat-info flex-grow-1">
-            <h6 class="mb-0">{{ $chat->to }}</h6>
-            @if (!empty($chat->contact) && !empty($chat->contact->getFullName()))
+            <h6 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h6>
+            {{-- @if (!empty($chat->contact) && !empty($chat->contact->getFullName()))
                 <p class="card-text mb-0 text-truncate">
                     {{ str_limit($chat->contact->getFullName(), 15) }}
                 </p>
-            @endif
+            @endif --}}
             <p class="card-text mb-0 text-truncate">
                 {{ $chat->from }}
             </p>
