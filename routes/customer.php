@@ -421,7 +421,8 @@
         Route::post('/{box}/remove-followup', 'ChatBoxController@remove_followup')->name('remove-followup');
         Route::post('/{box}/remove-freshlead', 'ChatBoxController@remove_freshlead')->name('remove-freshlead');
         Route::post('/{box}/remove-undercontract', 'ChatBoxController@remove_undercontract')->name('remove-undercontract');
-
+        Route::post('/{box}/pin', 'ChatBoxController@pin')->name('pin');
+        Route::any('/load', 'ChatBoxController@loadChatUsers')->name('load');
     });
 
     /*

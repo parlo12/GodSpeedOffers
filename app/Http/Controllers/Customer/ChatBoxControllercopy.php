@@ -8,7 +8,6 @@ use App\Models\Blacklists;
 use App\Models\Campaigns;
 use App\Models\ChatBox;
 use App\Models\ChatBoxMessage;
-use App\Models\ContactGroups;
 use App\Models\Contacts;
 use App\Models\Country;
 use App\Models\CustomerBasedPricingPlan;
@@ -27,18 +26,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberUtil;
+use App\Models\ContactGroups;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use App\Repositories\Contracts\ContactsRepository;
 use App\Library\Tool;
 use App\Models\User;
-use Throwable;
+use Log;
 
 class ChatBoxController extends Controller
 {
     protected CampaignRepository $campaigns;
+    protected ContactsRepository $contactGroups;
 
     /**
      * ChatBoxController constructor.
@@ -61,27 +62,96 @@ class ChatBoxController extends Controller
         $pageConfigs = [
             'pageHeader'    => false,
             'contentLayout' => 'content-left-sidebar',
-            'pageClass'     => 'chat-application font-small-3',
+            'pageClass'     => 'chat-application',
         ];
 
-        $pinnedChats = ChatBox::where('user_id', Auth::id())
-            ->where('is_starred', 1)
-            ->with(['chatBoxMessages', 'contact'])
+        // Get the current page, default is 1
+        $currentPage = request()->get('page', 1);
+
+        // Paginate the chat boxes (10 items per page as an example)
+        $chat_box = ChatBox::where('user_id', Auth::user()->id)
+            ->select('uid', 'id', 'to', 'from', 'updated_at', 'notification', 'is_starred')
+            ->where('reply_by_customer', true)
             ->orderBy('updated_at', 'desc')
-            ->get();
-            $unread_count = ChatBox::where('notification', '>', 0)
+            ->paginate(500);
+
+        // Count unread messages
+        $unread_count = ChatBox::where('notification', '>', 0)
             ->where('reply_by_customer', true)
             ->where('user_id', Auth::user()->id)
             ->count();
+        $unread_chat = ChatBox::where('user_id', Auth::user()->id)
+            ->where('notification', '>', 0)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        // Get templates
+        $starred_chats = ChatBox::where('user_id', Auth::user()->id)
+            ->where('is_starred', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        $follow_up = ChatBox::where('user_id', Auth::user()->id)
+            ->orWhere('pipeline_user', Auth::user()->id)
+            ->where('follow_up', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        $under_contract = ChatBox::where('user_id', Auth::user()->id)
+            ->orWhere('pipeline_user', Auth::user()->id)
+            ->where('under_contract', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
+        $fresh_lead = ChatBox::where('user_id', Auth::user()->id)
+            ->orWhere('pipeline_user', Auth::user()->id)
+            ->where('fresh_lead', true)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(500);
         $templates = Templates::where('status', true)->where('user_id', auth()->user()->id)->get();
 
         return view('customer.ChatBox.index', [
             'pageConfigs' => $pageConfigs,
+            'chat_box'    => $chat_box,
             'templates'   => $templates,
+            'unread_box' => $unread_chat,
             'unread_chats' => $unread_count,
-            // 'pinnedChats' => $pinnedChats,
+            'starred_box' =>  $starred_chats,
+            'follow_up' =>  $follow_up,
+            'under_contract' =>  $under_contract,
+            'fresh_lead'=>$fresh_lead
         ]);
     }
+
+
+    public function refresh_sidebar(): JsonResponse
+    {
+        $unread_count = ChatBox::where('notification', '>', 0)
+            ->where('reply_by_customer', true)
+            ->where('user_id', Auth::user()->id)
+            ->count();
+
+        $chat_box = ChatBox::where('user_id', Auth::user()->id)
+            ->where('reply_by_customer', true)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // $unread_chat = ChatBox::where('user_id', Auth::user()->id)
+        //     ->where('notification', '>', 0)
+        //     ->where('reply_by_customer', true)
+        //     ->orderBy('updated_at', 'desc')
+        //     ->get();
+
+        
+
+        return response()->json([
+            'status' => 'success',
+            'chat_box' => $chat_box,
+            'unread_chats' => $unread_count
+        ]);
+    }
+    private function contact_info() {}
 
     /**
      * start new conversation
@@ -164,16 +234,6 @@ class ChatBoxController extends Controller
         $phoneNumberUtil   = PhoneNumberUtil::getInstance();
         $phoneNumberObject = $phoneNumberUtil->parse('+' . $country->country_code . $request->input('recipient'));
         $countryCode       = $phoneNumberObject->getCountryCode();
-        $regionCode        = $phoneNumberUtil->getRegionCodeForNumber($phoneNumberObject);
-
-        if (! $phoneNumberUtil->isPossibleNumber($phoneNumberObject) || empty($countryCode) || empty($regionCode)) {
-
-            return redirect()->route('customer.chatbox.index')->with([
-                'status'  => 'error',
-                'message' => __('locale.customer.invalid_phone_number', ['phone' => $country->country_code . $request->input('recipient')]),
-            ]);
-        }
-
 
         if ($phoneNumberObject->isItalianLeadingZero()) {
             $phone = '0' . preg_replace("/^$countryCode/", '', $phoneNumberObject->getNationalNumber());
@@ -183,7 +243,7 @@ class ChatBoxController extends Controller
 
         $input['country_code'] = $countryCode;
         $input['recipient']    = $phone;
-        $input['region_code']  = $regionCode;
+        $input['region_code']  = $phoneNumberUtil->getRegionCodeForNumber($phoneNumberObject);
         $input['user']         = Auth::user();
 
         $planId = $user->customer->activeSubscription()->plan_id;
@@ -272,198 +332,6 @@ class ChatBoxController extends Controller
         return redirect()->route('customer.chatbox.index')->with([
             'status'  => 'error',
             'message' => __('locale.exceptions.something_went_wrong'),
-        ]);
-    }
-
-    public function refresh_sidebar(): JsonResponse
-    {
-        $unread_count = ChatBox::where('notification', '>', 0)
-            ->where('reply_by_customer', true)
-            ->where('user_id', Auth::user()->id)
-            ->count();
-        return response()->json([
-            'status' => 'success',
-            'unread_chats' => $unread_count
-        ]);
-    }
-
-    /**
-     * get chat messages
-     */
-    public function messages(ChatBox $box): JsonResponse
-    {
-        $box->update([
-            'notification' => 0,
-        ]);
-
-
-        $timezone = Auth::user()->timezone ?? config('app.timezone');
-
-        $data = ChatBoxMessage::where('box_id', $box->id)
-            ->orderBy('created_at')
-            ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
-            ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
-            ->toArray();
-
-        $data = array_map(function ($message) use ($timezone) {
-            $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
-
-            return $message;
-        }, $data);
-
-        $jsonData = json_encode($data, true);
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $jsonData,
-            'starred' => $box->is_starred,
-        ]);
-    }
-
-    /**
-     * get chat messages
-     */
-    public function messagesWithNotification(ChatBox $box): JsonResponse
-    {
-        $data = ChatBoxMessage::where('box_id', $box->id)->select('message', 'send_by', 'media_url', 'box_id', 'created_at')->latest()->first()->toJson();
-
-
-        return response()->json([
-            'status'       => 'success',
-            'data'         => $data,
-            'notification' => $box->notification,
-        ]);
-    }
-
-    /**
-     * delete chatbox messages
-     */
-    public function delete(ChatBox $box): JsonResponse
-    {
-        $messages = ChatBoxMessage::where('box_id', $box->id)->delete();
-        if ($messages) {
-            $box->delete();
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => __('locale.campaigns.sms_was_successfully_deleted'),
-            ]);
-        }
-
-        return response()->json([
-            'status'  => 'error',
-            'message' => __('locale.exceptions.something_went_wrong'),
-        ]);
-    }
-
-    /**
-     * add to blacklist
-     */
-    public function block(ChatBox $box): JsonResponse
-    {
-        $status = Blacklists::create([
-            'user_id' => auth()->user()->id,
-            'number'  => $box->to,
-            'reason'  => 'Blacklisted by ' . auth()->user()->displayName(),
-        ]);
-
-        if ($status) {
-
-            $contact = Contacts::where('phone', $box->to)->first();
-            $contact?->update([
-                'status' => 'unsubscribe',
-            ]);
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => __('locale.blacklist.blacklist_successfully_added'),
-            ]);
-        }
-
-        return response()->json([
-            'status'  => 'error',
-            'message' => __('locale.exceptions.something_went_wrong'),
-        ]);
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function loadChatUsers(Request $request)
-    {
-        $filter = $request->get('filter', 'unread');
-        $search = $request->get('search', '');
-        $page   = $request->get('page', 1);
-    
-        // Start the base query with user conditions
-        $query = ChatBox::where(function ($q) {
-            $q->where('user_id', Auth::id())
-                ->orWhere('pipeline_user', Auth::id())
-                ->where('reply_by_customer', true)
-                ;
-        });
-    
-        // Apply the filter using switch
-        switch ($filter) {
-            case 'unread':
-                $query->where('notification', '>', 0);
-                     //->where('is_starred', false);
-                break;
-            case 'read':
-                $query->where('notification', '=', 0)
-                    ->where('is_starred', false);
-                break;
-            case 'starred':
-                $query->where('is_starred', true);
-                break;
-            case 'fresh-lead':
-                $query->where('fresh_lead', true)
-                    ->where('is_starred', false);
-                break;
-            case 'under-contract':
-                $query->where('under_contract', true)
-                    ->where('is_starred', false);
-                break;
-            case 'follow-up':
-                $query->where('follow_up', true)
-                    ->where('is_starred', false);
-                break;
-        }
-    
-        // Apply the search if provided
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('from', 'LIKE', "%{$search}%")
-                    ->orWhere('to', 'LIKE', "%{$search}%");
-            });
-        }
-    
-        // Ensure results are sorted by the latest
-        $query->orderBy('updated_at', 'desc');
-    
-        // Load related models
-        $query->with(['chatBoxMessages', 'contact']);
-    
-        // Paginate the results, limiting to 500 per page
-        $chat_box = $query->paginate(500, ['*'], 'page', $page);
-    
-        return view('customer.ChatBox.partials._chat_list', compact('chat_box'))->render();
-    }
-    
-
-
-    /**
-     * add to blacklist
-     */
-    public function pin(ChatBox $box): JsonResponse
-    {
-        $box->update([
-            'is_starred' => ! $box->is_starred,
-        ]);
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => $box->is_starred?"Added to pinned":"Removed from pinned",
         ]);
     }
     /**
@@ -645,6 +513,38 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to update Follow up status.'], $response->status());
         }
     }
+
+
+    /**
+     * get chat messages
+     */
+    public function messages(ChatBox $box): JsonResponse
+    {
+        $box->update([
+            'notification' => 0,
+        ]);
+
+
+        $timezone = Auth::user()->timezone ?? config('app.timezone');
+
+        $data = ChatBoxMessage::where('box_id', $box->id)
+            ->orderBy('created_at')
+            ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
+            ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
+            ->toArray();
+        $timezone = Auth::user()->timezone ?? config('app.timezone');
+        $data = array_map(function ($message) use ($timezone) {
+            $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
+            return $message;
+        }, $data);
+
+        $jsonData = json_encode($data, true);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $jsonData,
+        ]);
+    }
     /**
      * get note
      */
@@ -770,7 +670,20 @@ class ChatBoxController extends Controller
             return response()->json(['error' => 'Failed to fetch data from API'], $response->status());
         }
     }
-   
+    /**
+     * get chat messages
+     */
+    public function messagesWithNotification(ChatBox $box): JsonResponse
+    {
+        $data = ChatBoxMessage::where('box_id', $box->id)->select('message', 'send_by', 'media_url', 'box_id', 'created_at')->latest()->first()->toJson();
+
+
+        return response()->json([
+            'status'       => 'success',
+            'data'         => $data,
+            'notification' => $box->notification,
+        ]);
+    }
 
     /**
      * reply message
@@ -920,7 +833,26 @@ class ChatBoxController extends Controller
         }
     }
 
-   
+    /**
+     * delete chatbox messages
+     */
+    public function delete(ChatBox $box): JsonResponse
+    {
+        $messages = ChatBoxMessage::where('box_id', $box->id)->delete();
+        if ($messages) {
+            $box->delete();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => __('locale.campaigns.sms_was_successfully_deleted'),
+            ]);
+        }
+
+        return response()->json([
+            'status'  => 'error',
+            'message' => __('locale.exceptions.something_went_wrong'),
+        ]);
+    }
     public function view(ChatBox $box): JsonResponse
     {
         $messages = ChatBoxMessage::where('box_id', $box->id)->delete();
@@ -938,7 +870,35 @@ class ChatBoxController extends Controller
             'message' => __('locale.exceptions.something_went_wrong'),
         ]);
     }
-   
+    /**
+     * add to blacklist
+     */
+    public function block(ChatBox $box): JsonResponse
+    {
+        $status = Blacklists::create([
+            'user_id' => auth()->user()->id,
+            'number'  => $box->to,
+            'reason'  => 'Blacklisted by ' . auth()->user()->displayName(),
+        ]);
+
+        if ($status) {
+
+            $contact = Contacts::where('phone', $box->to)->first();
+            $contact?->update([
+                'status' => 'unsubscribe',
+            ]);
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => __('locale.blacklist.blacklist_successfully_added'),
+            ]);
+        }
+
+        return response()->json([
+            'status'  => 'error',
+            'message' => __('locale.exceptions.something_went_wrong'),
+        ]);
+    }
     public function view_chat_contact(ChatBox $box): JsonResponse
     {
         Log::info($box->to);
@@ -1045,7 +1005,7 @@ class ChatBoxController extends Controller
             }
         } catch (\Exception $e) {
             // Handle exceptions and log the error
-            log::error("Error fetching wake time for Assistant ID: {$assistant_id}", [
+            Log::error("Error fetching wake time for Assistant ID: {$assistant_id}", [
                 'error' => $e->getMessage(),
             ]);
 
