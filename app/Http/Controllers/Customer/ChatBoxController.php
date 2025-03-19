@@ -525,13 +525,19 @@ class ChatBoxController extends Controller
 
         $messages = json_encode($data, true);
         if($pipeline=="follow_up"){
-            $this->follow_up_lead($chat_box->to, $userId, $messages);
+            $chat_box->fresh_lead = 0;
+            $chat_box->under_contract = 0;
+           // $this->follow_up_lead($chat_box->to, $userId, $messages);
         }
         else if($pipeline=="under_contract"){
-            $this->under_contract_lead( $chat_box->to, $userId,$messages);
+            $chat_box->fresh_lead = 0;
+            $chat_box->follow_up = 0;
+           // $this->under_contract_lead( $chat_box->to, $userId,$messages);
         }
         else{
-            $this->fresh_lead( $chat_box->to, $userId,$messages);
+            //$this->fresh_lead( $chat_box->to, $userId,$messages);
+            $chat_box->follow_up = 0;
+            $chat_box->under_contract = 0;
         }
         return response()->json([
             'status'  => 'success',
@@ -542,33 +548,33 @@ class ChatBoxController extends Controller
     /**
      * update follow up info
      */
-    public function under_contract(Request $request)
-    {
-        $userId = $request->input('user_id');
-        $chat_id = $request->input('chat_id');
-        $chat_box = ChatBox::firstWhere('uid', $chat_id);
-        $chat_box->under_contract = 1;
-        $chat_box->save();
-        $data = ChatBoxMessage::where('box_id', $chat_box->id)
-            ->orderBy('created_at')
-            ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
-            ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
-            ->toArray();
-        $timezone = Auth::user()->timezone ?? config('app.timezone');
+    // public function under_contract(Request $request)
+    // {
+    //     $userId = $request->input('user_id');
+    //     $chat_id = $request->input('chat_id');
+    //     $chat_box = ChatBox::firstWhere('uid', $chat_id);
+    //     $chat_box->under_contract = 1;
+    //     $chat_box->save();
+    //     $data = ChatBoxMessage::where('box_id', $chat_box->id)
+    //         ->orderBy('created_at')
+    //         ->select('message', 'send_by', 'media_url', 'box_id', 'created_at')
+    //         ->get(['message', 'send_by', 'media_url', 'box_id', 'created_at'])
+    //         ->toArray();
+    //     $timezone = Auth::user()->timezone ?? config('app.timezone');
 
-        $data = array_map(function ($message) use ($timezone) {
-            $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
+    //     $data = array_map(function ($message) use ($timezone) {
+    //         $message['created_at'] = Carbon::parse($message['created_at'])->timezone($timezone)->format(config('app.date_format') . ', g:i A');
 
-            return $message;
-        }, $data);
+    //         return $message;
+    //     }, $data);
 
-        $messages = json_encode($data, true);
-        return response()->json([
-            'status'  => 'success',
-            'response' => response()->json($chat_box),
-            'message' => 'Under Contract details updated successfully'
-        ]);
-    }
+    //     $messages = json_encode($data, true);
+    //     return response()->json([
+    //         'status'  => 'success',
+    //         'response' => response()->json($chat_box),
+    //         'message' => 'Under Contract details updated successfully'
+    //     ]);
+    // }
     /**
      * add note
      */
