@@ -238,7 +238,7 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
-                        location.reload()
+                        //location.reload()
                         // Toggle the star icon
                     } else {
                         console.error('Error removing fresh lead:', data.message);
