@@ -680,7 +680,7 @@ class ChatBoxController extends Controller
      */
     public function remove_followup(ChatBox $box): JsonResponse
     {
-        $box->follow_up = !$box->follow_up;
+        $box->follow_up = 0;
         $box->save();
         return response()->json(
             [
@@ -694,7 +694,7 @@ class ChatBoxController extends Controller
      */
     public function remove_undercontract(ChatBox $box): JsonResponse
     {
-        $box->under_contract = !$box->under_contract;
+        $box->under_contract = 0;
         $box->save();
         return response()->json(
             [
@@ -708,7 +708,7 @@ class ChatBoxController extends Controller
      */
     public function remove_freshlead(ChatBox $box): JsonResponse
     {
-        $box->fresh_lead = !$box->fresh_lead;
+        $box->fresh_lead = 0;
         $box->save();
         return response()->json(
             [
