@@ -463,6 +463,7 @@
         }
 
         function removeFollowup(chatId, element) {
+            alert("remove followup")
             // Send AJAX request to toggle the starred status
             fetch(`/chat-box/${chatId}/remove-followup`, {
                     method: 'POST',
