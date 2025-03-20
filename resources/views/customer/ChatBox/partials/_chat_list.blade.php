@@ -54,10 +54,19 @@
             @if($chat->follow_up)
             <button type="button"
                     class="btn  {{ $chat->follow_up ? 'bg-danger' : '' }} p-0 star-btn float-end"
-                    onclick="removeUnderContract('{{ $chat->uid }}', this)"
+                    onclick="removeFollowup('{{ $chat->uid }}', this)"
                     title="{{ $chat->follow_up ? 'remove From Follow Up' : 'Remove ' }}">
                     <i data-feather="trash-2"
                         class="cursor-pointer font-medium-2  {{ $chat->follow_up ? 'text-white' : 'text-secondary' }}"></i>
+            </button> 
+            @endif
+            @if($chat->fresh_lead)
+            <button type="button"
+                    class="btn  {{ $chat->fresh_lead ? 'bg-danger' : '' }} p-0 star-btn float-end"
+                    onclick="removeFreshLead('{{ $chat->uid }}', this)"
+                    title="{{ $chat->fresh_lead ? 'remove From Fresh Lead' : 'Remove ' }}">
+                    <i data-feather="trash-2"
+                        class="cursor-pointer font-medium-2  {{ $chat->fresh_lead ? 'text-white' : 'text-secondary' }}"></i>
             </button> 
             @endif
         </div>
