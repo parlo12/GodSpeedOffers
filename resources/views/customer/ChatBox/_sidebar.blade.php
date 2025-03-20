@@ -11,17 +11,17 @@
                 <span id="unread_count"
                 class="badge bg-warning rounded-pill float-end notification_count">{{ $unread_chats }}</span>
             </button>
-            <button onclick="reloadStarred()" id="read-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button  id="read-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="read">{{ __('locale.labels.read') }}</button>
-            <button id="starred-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button onclick="reloadStarred()" id="starred-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="starred">starred</button>
         </div>
         <div role="group" class="tab-group btn-group mb-2">
-            <button id="followup-tab"type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button onclick="reloadFollowup()" id="followup-tab"type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="follow-up">Follow Up</button>
-            <button id="undercontract-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button onclick="reloadUndercontract()" id="undercontract-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="under-contract">Under Contract</button>
-            <button id="freshlead-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button onclick="reloadFreshlead()" id="freshlead-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="fresh-lead">Fresh Lead</button>
         </div>
     </div>
@@ -112,30 +112,39 @@
     <script>
         function reloadPage() {
             localStorage.setItem('activeTab', 'unread-tab');
+            location.reload()
+
            // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
         function reloadStarred() {
             localStorage.setItem('activeTab', 'starred-tab');
+            location.reload()
             //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
         function reloadFollowup() {
             localStorage.setItem('activeTab', 'followup-tab');
+            location.reload()
+
             // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
         function reloadUndercontract() {
             localStorage.setItem('activeTab', 'undercontract-tab');
+            location.reload()
+
             //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
 
         function reloadFreshlead() {
             localStorage.setItem('activeTab', 'freshlead-tab');
+            location.reload()
+
             //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
 
         }
