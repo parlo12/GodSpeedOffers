@@ -245,7 +245,14 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
-                        //location.reload()
+                        toastr['success'](response.message, 'Success!!', {
+                            closeButton: true,
+                            positionClass: 'toast-top-right',
+                            progressBar: true,
+                            newestOnTop: true,
+                            rtl: isRtl
+                        });
+                        location.reload()
                         // Toggle the star icon
                     } else {
                         console.error('Error removing fresh lead:', data.message);
@@ -265,6 +272,13 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
+                        toastr['success'](response.message, 'Success!!', {
+                            closeButton: true,
+                            positionClass: 'toast-top-right',
+                            progressBar: true,
+                            newestOnTop: true,
+                            rtl: isRtl
+                        });
                         location.reload()
                         // Toggle the star icon
                     } else {
@@ -272,6 +286,5 @@
                     }
                 }).catch(error => console.error('Error:', error));
         }
-       
     </script>
 </div>

@@ -647,7 +647,8 @@ $(document).on("click", ".chat-users-list li", function() {
                                 });
                             console.log('Pipeline updated successfully:',
                                 response);
-                        },
+                                location.reload()
+                            },
                         error: function(xhr, status, error) {
                             toastr['warning']('Server Error',
                                 "{{ __('locale.labels.attention') }}", {
