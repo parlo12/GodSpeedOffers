@@ -528,17 +528,23 @@ class ChatBoxController extends Controller
         if($pipeline=="follow_up"){
             $chat_box->fresh_lead = 0;
             $chat_box->under_contract = 0;
+            $chat_box->save();
+
            // $this->follow_up_lead($chat_box->to, $userId, $messages);
         }
         else if($pipeline=="under_contract"){
             $chat_box->fresh_lead = 0;
             $chat_box->follow_up = 0;
+            $chat_box->save();
+
            // $this->under_contract_lead( $chat_box->to, $userId,$messages);
         }
         else{
             //$this->fresh_lead( $chat_box->to, $userId,$messages);
             $chat_box->follow_up = 0;
             $chat_box->under_contract = 0;
+            $chat_box->save();
+
         }
         return response()->json([
             'status'  => 'success',
