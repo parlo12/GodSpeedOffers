@@ -11,7 +11,7 @@
                 <span id="unread_count"
                 class="badge bg-warning rounded-pill float-end notification_count">{{ $unread_chats }}</span>
             </button>
-            <button  id="read-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button onclick="reloadRead()" id="read-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="read">{{ __('locale.labels.read') }}</button>
             <button onclick="reloadStarred()" id="starred-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="starred">starred</button>
@@ -112,6 +112,13 @@
     <script>
         function reloadPage() {
             localStorage.setItem('activeTab', 'unread-tab');
+            location.reload()
+
+           // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+
+        }
+        function reloadRead() {
+            localStorage.setItem('activeTab', 'read-tab');
             location.reload()
 
            // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
