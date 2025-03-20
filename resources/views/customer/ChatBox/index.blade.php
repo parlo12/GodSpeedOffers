@@ -630,7 +630,7 @@ $(document).on("click", ".chat-users-list li", function() {
                     e.preventDefault(); // Prevent default form submission
                     const formData = $(this).serialize(); // Serialize the form data
                     $.ajax({
-                        url: '{{ url(' / chat - box / add - pipeline ') }}', // Replace with your Laravel endpoint
+                        url: '{{ url('/chat-box/add-pipeline') }}', // Replace with your Laravel endpoint
                         type: 'POST',
                         data: formData,
                         headers: {
