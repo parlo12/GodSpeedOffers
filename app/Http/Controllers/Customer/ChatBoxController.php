@@ -502,6 +502,7 @@ class ChatBoxController extends Controller
      */
     public function add_pipeline(Request $request)
     {
+        Log::info("adding to pipelines");
         $userId = $request->input('user_id');
         $chat_id = $request->input('chat_id');
         $pipeline=$request->input('pipeline');
