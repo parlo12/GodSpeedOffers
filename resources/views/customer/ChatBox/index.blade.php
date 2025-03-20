@@ -18,8 +18,10 @@
     <style>
         /* For screens smaller than 576px */
         @media (max-width: 576px) {
+
             /* Set the max-width of the image or video to 100% to make it responsive */
-            img, video {
+            img,
+            video {
                 max-width: 100%;
                 height: auto;
             }
@@ -27,7 +29,9 @@
 
         /* For screens between 576px and 768px */
         @media (min-width: 576px) and (max-width: 768px) {
-            img, video {
+
+            img,
+            video {
                 max-width: 100%;
                 height: auto;
             }
@@ -35,7 +39,9 @@
 
         /* For screens between 768px and 992px */
         @media (min-width: 768px) and (max-width: 992px) {
-            img, video {
+
+            img,
+            video {
                 max-width: 100%;
                 height: auto;
             }
@@ -43,7 +49,9 @@
 
         /* For screens between 992px and 1200px */
         @media (min-width: 992px) and (max-width: 1200px) {
-            img, video {
+
+            img,
+            video {
                 max-width: 100%;
                 height: auto;
             }
@@ -51,12 +59,13 @@
 
         /* For screens larger than 1200px */
         @media (min-width: 1200px) {
-            img, video {
+
+            img,
+            video {
                 max-width: 100%;
                 height: auto;
             }
         }
-
     </style>
 
 @endsection
@@ -79,8 +88,7 @@
                 {{ __('locale.labels.new_conversion') }}
             </h4>
             <h4 class="sidebar-toggle start-chat-text d-none d-md-block">
-                <a href="{{ route('customer.chatbox.new') }}"
-                   class="text-dark">{{ __('locale.labels.new_conversion') }}</a>
+                <a href="{{ route('customer.chatbox.new') }}" class="text-dark">{{ __('locale.labels.new_conversion') }}</a>
             </h4>
         </div>
         <!--/ To load Conversation -->
@@ -153,11 +161,10 @@
 
                             <!-- Add Note Tab -->
                             <div class="tab-pane fade" id="add-note" role="tabpanel" aria-labelledby="add-note-tab">
-here
+                                here
                             </div>
                             {{-- Follow up --}}
-                            <div class="tab-pane fade show " id="follow-up" role="tabpanel"
-                                aria-labelledby="follow-up-tab">
+                            <div class="tab-pane fade show " id="follow-up" role="tabpanel" aria-labelledby="follow-up-tab">
 
                             </div>
                             {{-- Under  --}}
@@ -228,7 +235,7 @@ here
     <!-- Page js files -->
     <script src="{{ asset(mix('js/scripts/pages/chat.js')) }}"></script>
     <script src="{{ asset(mix('vendors/js/extensions/sweetalert2.all.min.js')) }}"></script>
-    @if(config('broadcasting.connections.pusher.app_id'))
+    @if (config('broadcasting.connections.pusher.app_id'))
         <script src="{{ asset(mix('js/scripts/echo.js')) }}"></script>
     @endif
 
@@ -239,7 +246,7 @@ here
             chatHistory = $(".chat_history");
 
         // Basic Select2 select
-        $(".select2").each(function () {
+        $(".select2").each(function() {
             let $this = $(this);
             $this.wrap('<div class="position-relative"></div>');
             $this.select2({
@@ -253,7 +260,7 @@ here
         });
 
 
-        $("#sms_template").on('change', function () {
+        $("#sms_template").on('change', function() {
 
             let template_id = $(this).val(),
                 $get_msg = $("#message");
@@ -263,19 +270,20 @@ here
             }
 
             $.ajax({
-                url: "{{ url('templates/show-data')}}" + '/' + template_id,
+                url: "{{ url('templates/show-data') }}" + '/' + template_id,
                 type: "POST",
                 data: {
-                    _token: "{{csrf_token()}}"
+                    _token: "{{ csrf_token() }}"
                 },
                 cache: false,
-                success: function (data) {
+                success: function(data) {
                     if (data.status === 'success') {
                         const caretPos = $get_msg[0].selectionStart;
                         const textAreaTxt = $get_msg.val();
                         let txtToAdd = data.message;
 
-                        $get_msg.val(textAreaTxt.substring(0, caretPos) + txtToAdd + textAreaTxt.substring(caretPos)).val().length;
+                        $get_msg.val(textAreaTxt.substring(0, caretPos) + txtToAdd + textAreaTxt
+                            .substring(caretPos)).val().length;
 
                     } else {
                         toastr['warning'](data.message, "{{ __('locale.labels.attention') }}", {
@@ -287,58 +295,64 @@ here
                         });
                     }
                 },
-                error: function (reject) {
+                error: function(reject) {
                     if (reject.status === 422) {
                         let errors = reject.responseJSON.errors;
-                        $.each(errors, function (key, value) {
-                            toastr['warning'](value[0], "{{__('locale.labels.attention')}}", {
+                        $.each(errors, function(key, value) {
+                            toastr['warning'](value[0],
+                                "{{ __('locale.labels.attention') }}", {
+                                    closeButton: true,
+                                    positionClass: 'toast-top-right',
+                                    progressBar: true,
+                                    newestOnTop: true,
+                                    rtl: isRtl
+                                });
+                        });
+                    } else {
+                        toastr['warning'](reject.responseJSON.message,
+                            "{{ __('locale.labels.attention') }}", {
                                 closeButton: true,
                                 positionClass: 'toast-top-right',
                                 progressBar: true,
                                 newestOnTop: true,
                                 rtl: isRtl
                             });
-                        });
-                    } else {
-                        toastr['warning'](reject.responseJSON.message, "{{__('locale.labels.attention')}}", {
-                            closeButton: true,
-                            positionClass: 'toast-top-right',
-                            progressBar: true,
-                            newestOnTop: true,
-                            rtl: isRtl
-                        });
                     }
                 }
             });
         });
 
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Cache chat container elements
             const chatHistory = $('.chat_history');
             const chatContainer = $('.user-chats .chats');
 
             // Use event delegation to bind click events to dynamically loaded users
-            $("#users-list").on("click", ".chat-users-list li, .chat-users-list-pinned li", function () {
-                chatHistory.empty();  // Clear previous chat messages
-                chatContainer.animate({scrollTop: chatContainer[0].scrollHeight}, 0);  // Scroll to the bottom initially
+            $("#users-list").on("click", ".chat-users-list li, .chat-users-list-pinned li", function() {
+                chatHistory.empty(); // Clear previous chat messages
+                chatContainer.animate({
+                    scrollTop: chatContainer[0].scrollHeight
+                }, 0); // Scroll to the bottom initially
 
                 $(this).find('.notification_count').remove();
 
-                const chat_id = $(this).data('id');  // Get the clicked chat ID
+                const chat_id = $(this).data('id'); // Get the clicked chat ID
 
                 $(".chat-users-list li, .chat-users-list-pinned li").removeClass("active");
                 $(this).addClass("active");
 
                 // Fetch messages via POST request
                 $.post(
-                    `{{ url('/chat-box')}}/${chat_id}/messages`,
-                    {_token: "{{ csrf_token() }}"}
-                )
-                    .done(function (response) {
+                        `{{ url('/chat-box') }}/${chat_id}/messages`, {
+                            _token: "{{ csrf_token() }}"
+                        }
+                    )
+                    .done(function(response) {
 
 
-                        let details = `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`,
+                        let details =
+                            `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`,
                             addToPin = $('.add-to-pin');
 
                         // Parse the response data
@@ -352,8 +366,10 @@ here
 
 
                             // Find the <i> element and change the data-feather attribute to 'delete'
-                            addToPin.find('svg').remove();  // Remove the old <i> element
-                            addToPin.append('<i data-feather="delete" class="cursor-pointer font-medium-2 mx-1 text-danger"></i>');
+                            addToPin.find('svg').remove(); // Remove the old <i> element
+                            addToPin.append(
+                                '<i data-feather="delete" class="cursor-pointer font-medium-2 mx-1 text-danger"></i>'
+                            );
 
                             // Re-initialize Feather icons to update
                             feather.replace();
@@ -363,8 +379,10 @@ here
                             addToPin.tooltip('dispose').tooltip();
 
                             // Find the <i> element and change the data-feather attribute to 'edit-2'
-                            addToPin.find('svg').remove();  // Remove the old <i> element
-                            addToPin.append('<i data-feather="edit-2" class="cursor-pointer font-medium-2 mx-1 text-info"></i>');
+                            addToPin.find('svg').remove(); // Remove the old <i> element
+                            addToPin.append(
+                                '<i data-feather="edit-2" class="cursor-pointer font-medium-2 mx-1 text-info"></i>'
+                            );
 
                             // Re-initialize Feather icons to update
                             feather.replace();
@@ -377,11 +395,14 @@ here
                             if (sms.media_url !== null) {
                                 let fileType = isImageOrVideo(sms.media_url);
                                 if (fileType === 'video') {
-                                    media_url = `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
+                                    media_url =
+                                        `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
                                 } else if (fileType === 'audio') {
-                                    media_url = `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
+                                    media_url =
+                                        `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
                                 } else {
-                                    media_url = `<p><img src="${sms.media_url}" alt="media" /></p>`;
+                                    media_url =
+                                        `<p><img src="${sms.media_url}" alt="media" /></p>`;
                                 }
                             }
 
@@ -408,56 +429,59 @@ here
 
                         // Append the chat messages to the chat history
                         chatHistory.append(details);
-                        chatContainer.animate({scrollTop: chatContainer[0].scrollHeight}, 400);  // Scroll to bottom of chat after loading
+                        chatContainer.animate({
+                            scrollTop: chatContainer[0].scrollHeight
+                        }, 400); // Scroll to bottom of chat after loading
 
                         // Show the active chat area
-                        $('.start-chat-area').addClass('d-none');  // Hide the initial "Start chat" screen
-                        $('.active-chat').removeClass('d-none');   // Show the chat area
+                        $('.start-chat-area').addClass(
+                            'd-none'); // Hide the initial "Start chat" screen
+                        $('.active-chat').removeClass('d-none'); // Show the chat area
                         $('.counter').hide();
 
                     })
-                    .fail(function (xhr, status, error) {
+                    .fail(function(xhr, status, error) {
                         console.error("Error loading messages:", error);
                     });
             });
         });
 
- // ***********************
- let messageInterval; // Declare the variable to hold the interval
+        // ***********************
+        let messageInterval; // Declare the variable to hold the interval
 
-function startMessagePulling(chat_id) {
-    messageInterval = setInterval(function() {
-        pullMessages(chat_id); // Replace 'your_chat_id' with the actual chat ID
-    }, 7000);
-}
+        function startMessagePulling(chat_id) {
+            messageInterval = setInterval(function() {
+                pullMessages(chat_id); // Replace 'your_chat_id' with the actual chat ID
+            }, 7000);
+        }
 
-function pullMessages(chat_id) {
+        function pullMessages(chat_id) {
 
-    $.post(`{{ url('/chat-box') }}/${chat_id}/messages`, {
-            _token: "{{ csrf_token() }}"
-        })
-        .done(function(response) {
-            chatHistory.empty();
-            let details = `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`;
+            $.post(`{{ url('/chat-box') }}/${chat_id}/messages`, {
+                    _token: "{{ csrf_token() }}"
+                })
+                .done(function(response) {
+                    chatHistory.empty();
+                    let details = `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`;
 
-            const cwData = JSON.parse(response.data);
+                    const cwData = JSON.parse(response.data);
 
-            cwData.forEach((sms) => {
-                let media_url = '';
-                if (sms.media_url !== null) {
-                    let fileType = isImageOrVideo(sms.media_url);
+                    cwData.forEach((sms) => {
+                        let media_url = '';
+                        if (sms.media_url !== null) {
+                            let fileType = isImageOrVideo(sms.media_url);
 
-                    if (fileType === 'video') {
-                        media_url =
-                            `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
-                    } else if (fileType === 'audio') {
-                        media_url =
-                            `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
-                    } else if (fileType === 'image') {
-                        media_url = `<p><img src="${sms.media_url}" alt="Image"/></p>`;
-                    } else {
-                        // For other file types, provide a downloadable link
-                        media_url = `
+                            if (fileType === 'video') {
+                                media_url =
+                                    `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
+                            } else if (fileType === 'audio') {
+                                media_url =
+                                    `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
+                            } else if (fileType === 'image') {
+                                media_url = `<p><img src="${sms.media_url}" alt="Image"/></p>`;
+                            } else {
+                                // For other file types, provide a downloadable link
+                                media_url = `
 <p>
     <a class="text-white" href="${sms.media_url}" download>
         <img src="https://godspeedoffers.com/mms/document.png" alt="Download file" class="cursor-pointer" style="width: 100%; height: auto;"/>
@@ -466,16 +490,16 @@ function pullMessages(chat_id) {
     </span>
     </a>
 </p>`;
-                    }
-                }
+                            }
+                        }
 
 
-                let message = '';
-                if (sms.message !== null) {
-                    message = `<p class="preserve-whitespace">${sms.message}</p>`;
-                }
+                        let message = '';
+                        if (sms.message !== null) {
+                            message = `<p class="preserve-whitespace">${sms.message}</p>`;
+                        }
 
-                const chatHtml = `<div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
+                        const chatHtml = `<div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
                     <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36"/>
@@ -490,77 +514,77 @@ function pullMessages(chat_id) {
             </div>
         </div>`;
 
-                details += chatHtml;
-            });
+                        details += chatHtml;
+                    });
 
-            chatHistory.append(details);
-            // chatContainer.animate({
-            //     scrollTop: chatContainer[0].scrollHeight
-            // }, 400);
-        })
-        .fail(function(xhr, status, error) {
-            console.log(error);
-        });
-}
+                    chatHistory.append(details);
+                    // chatContainer.animate({
+                    //     scrollTop: chatContainer[0].scrollHeight
+                    // }, 400);
+                })
+                .fail(function(xhr, status, error) {
+                    console.log(error);
+                });
+        }
 
-$(document).on("click", ".chat-users-list li", function() {
+        $(document).on("click", ".chat-users-list li", function() {
 
-    clearInterval(messageInterval);
+            clearInterval(messageInterval);
 
-    chatHistory.empty();
-    chatContainer.animate({
-        scrollTop: chatContainer[0].scrollHeight
-    }, 0)
+            chatHistory.empty();
+            chatContainer.animate({
+                scrollTop: chatContainer[0].scrollHeight
+            }, 0)
 
-    const chat_id = $(this).data('id');
+            const chat_id = $(this).data('id');
 
-    startMessagePulling(chat_id);
+            startMessagePulling(chat_id);
 
 
 
-    $.post(
-            `{{ url('/chat-box') }}/${chat_id}/messages`, {
-                _token: "{{ csrf_token() }}"
-            }
-        )
-        .done(function(response) {
-            let details = `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`;
+            $.post(
+                    `{{ url('/chat-box') }}/${chat_id}/messages`, {
+                        _token: "{{ csrf_token() }}"
+                    }
+                )
+                .done(function(response) {
+                    let details = `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`;
 
-            const cwData = JSON.parse(response.data);
+                    const cwData = JSON.parse(response.data);
 
-            cwData.forEach((sms) => {
-                let media_url = '';
-                if (sms.media_url !== null) {
-                    let fileType = isImageOrVideo(sms.media_url);
+                    cwData.forEach((sms) => {
+                        let media_url = '';
+                        if (sms.media_url !== null) {
+                            let fileType = isImageOrVideo(sms.media_url);
 
-                    if (fileType === 'video') {
-                        media_url =
-                            `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
-                    } else if (fileType === 'audio') {
-                        media_url =
-                            `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
-                    } else if (fileType === 'image') {
-                        media_url = `<p><img src="${sms.media_url}" alt="Image"/></p>`;
-                    } else {
-                        // For other file types, provide a downloadable link
-                        media_url = `
+                            if (fileType === 'video') {
+                                media_url =
+                                    `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
+                            } else if (fileType === 'audio') {
+                                media_url =
+                                    `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
+                            } else if (fileType === 'image') {
+                                media_url = `<p><img src="${sms.media_url}" alt="Image"/></p>`;
+                            } else {
+                                // For other file types, provide a downloadable link
+                                media_url = `
 <p>
     <a class="text-secondary" href="${sms.media_url}" download>
         <img src="https://godspeedoffers.com/mms/document.png" alt="Download file" class="cursor-pointer" style="width: 100%; height: auto;"/>
         Doc
     </a>
 </p>`;
-                    }
-                }
+                            }
+                        }
 
 
-                let message = '';
-                if (sms.message !== null) {
-                    // Apply the preserve-whitespace class to maintain the message formatting
-                    message = `<p class="preserve-whitespace">${sms.message}</p>`;
-                }
+                        let message = '';
+                        if (sms.message !== null) {
+                            // Apply the preserve-whitespace class to maintain the message formatting
+                            message = `<p class="preserve-whitespace">${sms.message}</p>`;
+                        }
 
-                const chatHtml = `<div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
+                        const chatHtml = `<div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
                 <div class="chat-avatar">
                     <span class="avatar box-shadow-1 cursor-pointer">
                         <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36"/>
@@ -575,26 +599,26 @@ $(document).on("click", ".chat-users-list li", function() {
                 </div>
             </div>`;
 
-                details += chatHtml;
-            });
+                        details += chatHtml;
+                    });
 
-            chatHistory.append(details);
-            chatContainer.animate({
-                scrollTop: chatContainer[0].scrollHeight
-            }, 400);
-        })
-        .fail(function(xhr, status, error) {
-            console.log(error);
-        });
-    // ***************************
-    $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
-            _token: "{{ csrf_token() }}"
-        })
-        .done(function(response) {
-            console.log(response);
+                    chatHistory.append(details);
+                    chatContainer.animate({
+                        scrollTop: chatContainer[0].scrollHeight
+                    }, 400);
+                })
+                .fail(function(xhr, status, error) {
+                    console.log(error);
+                });
+            // ***************************
+            $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
+                    _token: "{{ csrf_token() }}"
+                })
+                .done(function(response) {
+                    console.log(response);
 
-            // Populate the form with response data
-            document.getElementById('follow-up').innerHTML = `
+                    // Populate the form with response data
+                    document.getElementById('follow-up').innerHTML = `
     <form id="pipeline-form">
         <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
         <div class="mb-1">
@@ -602,14 +626,14 @@ $(document).on("click", ".chat-users-list li", function() {
             <select required class="form-select" id="user-id" name="user_id">
                 <option selected>Assign To</option>
                 ${response.user_and_orgs.map(user_org => `
-                      <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                              <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                 ).join('')}
             </select>
             <label for=crm_user" class="form-label">CRM User</label>
             <select required class="form-select" id="crm-user" name="crm_user">
                 <option selected>Select CRM user</option>
                 ${response.crm_users.map(crm_user => `
-                      <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
+                              <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
                 ).join('')}
             </select>
             <label for="pipeline" class="form-label">Pipeline</label>
@@ -623,59 +647,59 @@ $(document).on("click", ".chat-users-list li", function() {
         </div>
         <button type="submit" class="btn btn-primary">Add To Pipeline</button>
     </form>`;
-            // Add event listener for form submission
-            $(document).ready(function() {
+                    // Add event listener for form submission
+                    $(document).ready(function() {
 
-                $('#pipeline-form').on('submit', function(e) {
-                    e.preventDefault(); // Prevent default form submission
-                    const formData = $(this).serialize(); // Serialize the form data
-                    $.ajax({
-                        url: '{{ url('/chat-box/add-pipeline') }}', // Replace with your Laravel endpoint
-                        type: 'POST',
-                        data: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
-                        },
-                        success: function(response) {
-                            toastr['success'](response.message,
-                                'Success!!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                            console.log('Pipeline updated successfully:',
-                                response);
-                                location.reload()
-                            },
-                        error: function(xhr, status, error) {
-                            toastr['warning']('Server Error',
-                                "{{ __('locale.labels.attention') }}", {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                            console.log('Error updating pipeline:', error);
-                        }
+                        $('#pipeline-form').on('submit', function(e) {
+                            e.preventDefault(); // Prevent default form submission
+                            const formData = $(this).serialize(); // Serialize the form data
+                            $.ajax({
+                                url: '{{ url('/chat-box/add-pipeline') }}', // Replace with your Laravel endpoint
+                                type: 'POST',
+                                data: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
+                                },
+                                success: function(response) {
+                                    toastr['success'](response.message,
+                                        'Success!!', {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
+                                    console.log('Pipeline updated successfully:',
+                                        response);
+                                    location.reload()
+                                },
+                                error: function(xhr, status, error) {
+                                    toastr['warning']('Server Error',
+                                        "{{ __('locale.labels.attention') }}", {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
+                                    console.log('Error updating pipeline:', error);
+                                }
+                            });
+                        })
                     });
                 })
-            });
-        })
-        .fail(function(xhr, status, error) {
-            console.log(error);
-        });
+                .fail(function(xhr, status, error) {
+                    console.log(error);
+                });
 
-    $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
-            _token: "{{ csrf_token() }}"
-        })
-        .done(function(response) {
-            console.log(response);
+            $.post(`{{ url('/chat-box') }}/${chat_id}/additional_info`, {
+                    _token: "{{ csrf_token() }}"
+                })
+                .done(function(response) {
+                    console.log(response);
 
-            // Populate the form with response data
-            document.getElementById('update-contact').innerHTML = `
+                    // Populate the form with response data
+                    document.getElementById('update-contact').innerHTML = `
     <form id="update-contact-form">
         <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
         <div class="mb-1">
@@ -691,7 +715,7 @@ $(document).on("click", ".chat-users-list li", function() {
             <select class="form-select" id="user-org" name="user_org">
                 <option selected>Select org</option>
                 ${response.user_and_orgs.map(user_org => `
-                                                                                <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                                                                                        <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                 ).join('')}
             </select>
         </div>
@@ -710,66 +734,66 @@ $(document).on("click", ".chat-users-list li", function() {
             <select class="form-select" id="contact-group" name="contact_group">
                 <option selected>Select Group</option>
                 ${response.groups.map(group => `
-                                                                                <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
+                                                                                        <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
                 ).join('')}
             </select>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>`;
 
-            // Make Contact Group read-only if group_id is not null
-            if (response.group_id !== null) {
-                document.getElementById('contact-group').setAttribute('disabled', true);
-            }
-
-            // Add event listener for form submission
-            $('#update-contact-form').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-                const formData = $(this).serialize(); // Serialize the form data
-                $.ajax({
-                    url: '{{ url(' / chat - box / update - contact ') }}', // Replace with your Laravel endpoint
-                    type: 'POST',
-                    data: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
-                    },
-                    success: function(response) {
-                        toastr['success'](response.message, 'Success!!', {
-                            closeButton: true,
-                            positionClass: 'toast-top-right',
-                            progressBar: true,
-                            newestOnTop: true,
-                            rtl: isRtl
-                        });
-                        console.log('Contact updated successfully:', response);
-                    },
-                    error: function(xhr, status, error) {
-                        toastr['warning']('Server Error',
-                            "{{ __('locale.labels.attention') }}", {
-                                closeButton: true,
-                                positionClass: 'toast-top-right',
-                                progressBar: true,
-                                newestOnTop: true,
-                                rtl: isRtl
-                            });
-                        console.log('Error updating contact:', error);
+                    // Make Contact Group read-only if group_id is not null
+                    if (response.group_id !== null) {
+                        document.getElementById('contact-group').setAttribute('disabled', true);
                     }
-                });
-            });
-        })
-        .fail(function(xhr, status, error) {
-            console.log(error);
-        });
-    $.post(
-            `{{ url('/chat-box') }}/${chat_id}/get-note`, {
-                _token: "{{ csrf_token() }}"
-            }
-        )
-        .done(function(response) {
-            console.log(response);
 
-            // Populate the form with response data
-            document.getElementById('add-note').innerHTML = `
+                    // Add event listener for form submission
+                    $('#update-contact-form').on('submit', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        const formData = $(this).serialize(); // Serialize the form data
+                        $.ajax({
+                            url: '{{ url(' / chat - box / update - contact ') }}', // Replace with your Laravel endpoint
+                            type: 'POST',
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
+                            },
+                            success: function(response) {
+                                toastr['success'](response.message, 'Success!!', {
+                                    closeButton: true,
+                                    positionClass: 'toast-top-right',
+                                    progressBar: true,
+                                    newestOnTop: true,
+                                    rtl: isRtl
+                                });
+                                console.log('Contact updated successfully:', response);
+                            },
+                            error: function(xhr, status, error) {
+                                toastr['warning']('Server Error',
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                                console.log('Error updating contact:', error);
+                            }
+                        });
+                    });
+                })
+                .fail(function(xhr, status, error) {
+                    console.log(error);
+                });
+            $.post(
+                    `{{ url('/chat-box') }}/${chat_id}/get-note`, {
+                        _token: "{{ csrf_token() }}"
+                    }
+                )
+                .done(function(response) {
+                    console.log(response);
+
+                    // Populate the form with response data
+                    document.getElementById('add-note').innerHTML = `
     <form id='add-note-form'>
         <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
         <div class="mb-1">
@@ -780,48 +804,48 @@ $(document).on("click", ".chat-users-list li", function() {
     </form>
 `;
 
-            // Add event listener for form submission
-            $('#add-note-form').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-                const formData = $(this).serialize(); // Serialize the form data
-                $.ajax({
-                    url: '{{ url(' / chat - box / add - note ') }}', // Replace with your Laravel endpoint
-                    type: 'POST',
-                    data: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
-                    },
-                    success: function(response) {
-                        toastr['success'](response.message, 'Success!!', {
-                            closeButton: true,
-                            positionClass: 'toast-top-right',
-                            progressBar: true,
-                            newestOnTop: true,
-                            rtl: isRtl
+                    // Add event listener for form submission
+                    $('#add-note-form').on('submit', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        const formData = $(this).serialize(); // Serialize the form data
+                        $.ajax({
+                            url: '{{ url(' / chat - box / add - note ') }}', // Replace with your Laravel endpoint
+                            type: 'POST',
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': "{{ csrf_token() }}" // CSRF token for security
+                            },
+                            success: function(response) {
+                                toastr['success'](response.message, 'Success!!', {
+                                    closeButton: true,
+                                    positionClass: 'toast-top-right',
+                                    progressBar: true,
+                                    newestOnTop: true,
+                                    rtl: isRtl
+                                });
+                                console.log('Note updated successfully:', response);
+                            },
+                            error: function(xhr, status, error) {
+                                toastr['warning']('Server Error',
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                                console.log('Error updating note:', error);
+                            }
                         });
-                        console.log('Note updated successfully:', response);
-                    },
-                    error: function(xhr, status, error) {
-                        toastr['warning']('Server Error',
-                            "{{ __('locale.labels.attention') }}", {
-                                closeButton: true,
-                                positionClass: 'toast-top-right',
-                                progressBar: true,
-                                newestOnTop: true,
-                                rtl: isRtl
-                            });
-                        console.log('Error updating note:', error);
-                    }
+                    });
+                })
+                .fail(function(xhr, status, error) {
+                    console.log(error);
                 });
-            });
-        })
-        .fail(function(xhr, status, error) {
-            console.log(error);
+
         });
 
-});
-
-// *************************************************
+        // *************************************************
         function isImageOrVideo(url) {
             const videoExtensions = ['mp4', 'avi', 'mkv', 'webm'];
             const audioExtensions = ['mp3', 'wav', 'ogg'];
@@ -922,7 +946,7 @@ $(document).on("click", ".chat-users-list li", function() {
         }
 
 
-        $(".remove-btn").on('click', function (event) {
+        $(".remove-btn").on('click', function(event) {
             event.preventDefault();
             let sms_id = $(".chat_id").val();
 
@@ -937,59 +961,64 @@ $(document).on("click", ".chat-users-list li", function() {
                     cancelButton: 'btn btn-outline-danger ms-1'
                 },
                 buttonsStyling: false,
-            }).then(function (result) {
+            }).then(function(result) {
                 if (result.value) {
                     $.ajax({
-                        url: "{{ url('/chat-box')}}" + '/' + sms_id + '/delete',
+                        url: "{{ url('/chat-box') }}" + '/' + sms_id + '/delete',
                         type: "POST",
                         data: {
-                            _token: "{{csrf_token()}}"
+                            _token: "{{ csrf_token() }}"
                         },
-                        success: function (response) {
+                        success: function(response) {
 
                             if (response.status === 'success') {
-                                toastr['success'](response.message, '{{__('locale.labels.success')}}!!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-
-                                setTimeout(function () {
-                                    window.location.reload(); // then reload the page.(3)
-                                }, 3000);
-
-                            } else {
-                                toastr['warning'](response.message, '{{ __('locale.labels.warning') }}!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                            }
-                        },
-                        error: function (reject) {
-                            if (reject.status === 422) {
-                                let errors = reject.responseJSON.errors;
-                                $.each(errors, function (key, value) {
-                                    toastr['warning'](value[0], "{{__('locale.labels.attention')}}", {
+                                toastr['success'](response.message,
+                                    '{{ __('locale.labels.success') }}!!', {
                                         closeButton: true,
                                         positionClass: 'toast-top-right',
                                         progressBar: true,
                                         newestOnTop: true,
                                         rtl: isRtl
                                     });
+
+                                setTimeout(function() {
+                                    window.location
+                                        .reload(); // then reload the page.(3)
+                                }, 3000);
+
+                            } else {
+                                toastr['warning'](response.message,
+                                    '{{ __('locale.labels.warning') }}!', {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                            }
+                        },
+                        error: function(reject) {
+                            if (reject.status === 422) {
+                                let errors = reject.responseJSON.errors;
+                                $.each(errors, function(key, value) {
+                                    toastr['warning'](value[0],
+                                        "{{ __('locale.labels.attention') }}", {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
                                 });
                             } else {
-                                toastr['warning'](reject.responseJSON.message, "{{__('locale.labels.attention')}}", {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
+                                toastr['warning'](reject.responseJSON.message,
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
                             }
                         }
                     });
@@ -998,7 +1027,7 @@ $(document).on("click", ".chat-users-list li", function() {
 
         })
 
-        $(".add-to-blacklist").on('click', function (event) {
+        $(".add-to-blacklist").on('click', function(event) {
             event.preventDefault();
             let sms_id = $(".chat_id").val();
 
@@ -1013,59 +1042,64 @@ $(document).on("click", ".chat-users-list li", function() {
                     cancelButton: 'btn btn-outline-danger ms-1'
                 },
                 buttonsStyling: false,
-            }).then(function (result) {
+            }).then(function(result) {
                 if (result.value) {
                     $.ajax({
-                        url: "{{ url('/chat-box')}}" + '/' + sms_id + '/block',
+                        url: "{{ url('/chat-box') }}" + '/' + sms_id + '/block',
                         type: "POST",
                         data: {
-                            _token: "{{csrf_token()}}"
+                            _token: "{{ csrf_token() }}"
                         },
-                        success: function (response) {
+                        success: function(response) {
 
                             if (response.status === 'success') {
-                                toastr['success'](response.message, '{{__('locale.labels.success')}}!!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-
-                                setTimeout(function () {
-                                    window.location.reload(); // then reload the page.(3)
-                                }, 3000);
-
-                            } else {
-                                toastr['warning'](response.message, '{{ __('locale.labels.warning') }}!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                            }
-                        },
-                        error: function (reject) {
-                            if (reject.status === 422) {
-                                let errors = reject.responseJSON.errors;
-                                $.each(errors, function (key, value) {
-                                    toastr['warning'](value[0], "{{__('locale.labels.attention')}}", {
+                                toastr['success'](response.message,
+                                    '{{ __('locale.labels.success') }}!!', {
                                         closeButton: true,
                                         positionClass: 'toast-top-right',
                                         progressBar: true,
                                         newestOnTop: true,
                                         rtl: isRtl
                                     });
+
+                                setTimeout(function() {
+                                    window.location
+                                        .reload(); // then reload the page.(3)
+                                }, 3000);
+
+                            } else {
+                                toastr['warning'](response.message,
+                                    '{{ __('locale.labels.warning') }}!', {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                            }
+                        },
+                        error: function(reject) {
+                            if (reject.status === 422) {
+                                let errors = reject.responseJSON.errors;
+                                $.each(errors, function(key, value) {
+                                    toastr['warning'](value[0],
+                                        "{{ __('locale.labels.attention') }}", {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
                                 });
                             } else {
-                                toastr['warning'](reject.responseJSON.message, "{{__('locale.labels.attention')}}", {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
+                                toastr['warning'](reject.responseJSON.message,
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
                             }
                         }
                     });
@@ -1074,7 +1108,7 @@ $(document).on("click", ".chat-users-list li", function() {
 
         })
 
-        $(".add-to-pin").on('click', function (event) {
+        $(".add-to-pin").on('click', function(event) {
             event.preventDefault();
             let sms_id = $(".chat_id").val();
 
@@ -1088,59 +1122,64 @@ $(document).on("click", ".chat-users-list li", function() {
                     cancelButton: 'btn btn-outline-danger ms-1'
                 },
                 buttonsStyling: false,
-            }).then(function (result) {
+            }).then(function(result) {
                 if (result.value) {
                     $.ajax({
-                        url: "{{ url('/chat-box')}}" + '/' + sms_id + '/pin',
+                        url: "{{ url('/chat-box') }}" + '/' + sms_id + '/pin',
                         type: "POST",
                         data: {
-                            _token: "{{csrf_token()}}"
+                            _token: "{{ csrf_token() }}"
                         },
-                        success: function (response) {
+                        success: function(response) {
 
                             if (response.status === 'success') {
-                                toastr['success'](response.message, '{{__('locale.labels.success')}}!!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-
-                                setTimeout(function () {
-                                    window.location.reload(); // then reload the page.(3)
-                                }, 1000);
-
-                            } else {
-                                toastr['warning'](response.message, '{{ __('locale.labels.warning') }}!', {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
-                            }
-                        },
-                        error: function (reject) {
-                            if (reject.status === 422) {
-                                let errors = reject.responseJSON.errors;
-                                $.each(errors, function (key, value) {
-                                    toastr['warning'](value[0], "{{__('locale.labels.attention')}}", {
+                                toastr['success'](response.message,
+                                    '{{ __('locale.labels.success') }}!!', {
                                         closeButton: true,
                                         positionClass: 'toast-top-right',
                                         progressBar: true,
                                         newestOnTop: true,
                                         rtl: isRtl
                                     });
+
+                                setTimeout(function() {
+                                    window.location
+                                        .reload(); // then reload the page.(3)
+                                }, 1000);
+
+                            } else {
+                                toastr['warning'](response.message,
+                                    '{{ __('locale.labels.warning') }}!', {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                            }
+                        },
+                        error: function(reject) {
+                            if (reject.status === 422) {
+                                let errors = reject.responseJSON.errors;
+                                $.each(errors, function(key, value) {
+                                    toastr['warning'](value[0],
+                                        "{{ __('locale.labels.attention') }}", {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
                                 });
                             } else {
-                                toastr['warning'](reject.responseJSON.message, "{{__('locale.labels.attention')}}", {
-                                    closeButton: true,
-                                    positionClass: 'toast-top-right',
-                                    progressBar: true,
-                                    newestOnTop: true,
-                                    rtl: isRtl
-                                });
+                                toastr['warning'](reject.responseJSON.message,
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
                             }
                         }
                     });
@@ -1223,63 +1262,68 @@ $(document).on("click", ".chat-users-list li", function() {
                 }
             });
         });
-        @if(config('broadcasting.connections.pusher.app_id'))
-        let activeChatID = $('.chat-users-list li.active').attr('data-id');
+        @if (config('broadcasting.connections.pusher.app_id'))
+            let activeChatID = $('.chat-users-list li.active').attr('data-id');
 
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: "{{ config('broadcasting.connections.pusher.key') }}",
-            cluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}",
-            encrypted: true,
-            authEndpoint: '{{config('app.url')}}/broadcasting/auth'
-        });
+            window.Echo = new Echo({
+                broadcaster: 'pusher',
+                key: "{{ config('broadcasting.connections.pusher.key') }}",
+                cluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}",
+                encrypted: true,
+                authEndpoint: '{{ config('app.url') }}/broadcasting/auth'
+            });
 
-        Pusher.logToConsole = false;
+            Pusher.logToConsole = false;
 
-        Echo.private('chat').listen('MessageReceived', (e) => {
-            // chatHistory.empty();
-            chatContainer.animate({scrollTop: chatContainer[0].scrollHeight}, 0);
+            Echo.private('chat').listen('MessageReceived', (e) => {
+                // chatHistory.empty();
+                chatContainer.animate({
+                    scrollTop: chatContainer[0].scrollHeight
+                }, 0);
 
-            let chat_id = e.data.uid;
-            let box_id = e.data.id;
+                let chat_id = e.data.uid;
+                let box_id = e.data.id;
 
-            $.ajax({
-                url: `{{ url('/chat-box')}}/${chat_id}/notification`,
-                type: "POST",
-                data: {
-                    _token: "{{csrf_token()}}"
-                },
-                success: function (response) {
-                    activeChatID = $('.chat-users-list li.active').attr('data-id');
-                    let details = `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`;
-                    const $contact = $(`.media-list li[data-box-id=${box_id}]`);
-                    const $counter = $(".counter", $contact).removeAttr('hidden');
-                    $(".notification_count", $contact).html(response.notification);
+                $.ajax({
+                    url: `{{ url('/chat-box') }}/${chat_id}/notification`,
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        activeChatID = $('.chat-users-list li.active').attr('data-id');
+                        let details =
+                            `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`;
+                        const $contact = $(`.media-list li[data-box-id=${box_id}]`);
+                        const $counter = $(".counter", $contact).removeAttr('hidden');
+                        $(".notification_count", $contact).html(response.notification);
 
-                    const sms = JSON.parse(response.data);
-                    let media_url = '';
-                    let message = '';
+                        const sms = JSON.parse(response.data);
+                        let media_url = '';
+                        let message = '';
 
-                    if (sms.media_url !== null) {
-                        let fileType = isImageOrVideo(sms.media_url);
-                        if (fileType === 'video') {
-                            media_url = `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag. <video/></p>`;
-                        } else if (fileType === 'audio') {
-                            media_url = `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element. </audio></p>`;
-                        } else {
-                            media_url = `<p><img src="${sms.media_url}" alt=""/></p>`;
+                        if (sms.media_url !== null) {
+                            let fileType = isImageOrVideo(sms.media_url);
+                            if (fileType === 'video') {
+                                media_url =
+                                    `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag. <video/></p>`;
+                            } else if (fileType === 'audio') {
+                                media_url =
+                                    `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element. </audio></p>`;
+                            } else {
+                                media_url = `<p><img src="${sms.media_url}" alt=""/></p>`;
+                            }
                         }
-                    }
 
-                    if (sms.message !== null) {
-                        message = `<p>${sms.message}</p>`;
-                    }
+                        if (sms.message !== null) {
+                            message = `<p>${sms.message}</p>`;
+                        }
 
-                    if (sms.send_by === 'to') {
-                        details += `<div class="chat chat-left">
+                        if (sms.send_by === 'to') {
+                            details += `<div class="chat chat-left">
                         <div class="chat-avatar">
                           <a class="avatar m-0" href="#">
-                            <img src="{{asset('images/profile/profile.jpg')}}" alt="avatar" height="40" width="40"/>
+                            <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="40" width="40"/>
                           </a>
                         </div>
                         <div class="chat-body">
@@ -1290,11 +1334,11 @@ $(document).on("click", ".chat-users-list li", function() {
                           </div>
                         </div>
                       </div>`;
-                    } else {
-                        details += `<div class="chat">
+                        } else {
+                            details += `<div class="chat">
                         <div class="chat-avatar">
                           <a class="avatar m-0" href="#">
-                            <img src="{{  route('user.avatar', Auth::user()->uid) }}" alt="avatar" height="40" width="40"/>
+                            <img src="{{ route('user.avatar', Auth::user()->uid) }}" alt="avatar" height="40" width="40"/>
                           </a>
                         </div>
                         <div class="chat-body">
@@ -1305,100 +1349,133 @@ $(document).on("click", ".chat-users-list li", function() {
                           </div>
                           </div>
                           </div>`;
-                    }
+                        }
 
-                    if (chat_id === activeChatID) {
-                        chatHistory.append(details);
-                        chatContainer.animate({scrollTop: chatContainer[0].scrollHeight}, 0);
-                    } else {
-                        $counter.html(response.notification);
-                        $counter.removeAttr('hidden');
+                        if (chat_id === activeChatID) {
+                            chatHistory.append(details);
+                            chatContainer.animate({
+                                scrollTop: chatContainer[0].scrollHeight
+                            }, 0);
+                        } else {
+                            $counter.html(response.notification);
+                            $counter.removeAttr('hidden');
+                        }
                     }
-                }
+                });
             });
-        });
         @endif
 
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             let page = 1;
-            let filter = 'unread';  // Default filter
-            let search = '';     // Default search value
+            let search = ''; // Default search value
+
+            // Map activeTab values to filter values
+            const tabToFilterMap = {
+                'unread-tab': 'unread',
+                'read-tab': 'read',
+                'starred-tab': 'starred',
+                'followup-tab': 'follow-up',
+                'undercontract-tab': 'under-contract',
+                'freshlead-tab': 'fresh-lead'
+            };
+
+            // Determine the initial filter based on localStorage or default to 'unread'
+            const activeTab = localStorage.getItem('activeTab');
+            let filter = tabToFilterMap[activeTab] || 'unread';
+
+            // Function to set the active tab and save it to localStorage
+            function setActiveTab(tabId) {
+                // Remove the 'btn-primary' class from all tab buttons
+                $('.tab-button').removeClass('btn-primary').addClass('btn-outline-primary');
+
+                // Add the 'btn-primary' class to the active tab button
+                $(`#${tabId}`).removeClass('btn-outline-primary').addClass('btn-primary');
+
+                // Save the active tab to localStorage
+                localStorage.setItem('activeTab', tabId);
+            }
 
             // Function to load chat users
             function loadChatUsers(page, filter, search, append = false) {
                 $.ajax({
                     url: "{{ url('/chat-box/load') }}" + `?page=${page}&filter=${filter}&search=${search}`,
                     type: 'GET',
-                    beforeSend: function () {
-                        $('#loader').show();  // Show the loader before the request
+                    beforeSend: function() {
+                        $('#loader').show(); // Show the loader before the request
                     },
-                    success: function (response) {
+                    success: function(response) {
                         console.log(response);
-                        $('#loader').hide();  // Hide the loader after data is loaded
+                        $('#loader').hide(); // Hide the loader after data is loaded
                         if (append) {
                             $('.chat-users-list').append(response); // Append new data
                         } else {
-                            $('.chat-users-list').html(response);   // Replace data
+                            $('.chat-users-list').html(response); // Replace data
                         }
 
                         feather.replace();
-
                     },
-                    error: function () {
-                        $('#loader').hide();  // Hide loader in case of error
-                        toastr['warning']('{{ __('locale.exceptions.something_went_wrong') }}', "{{ __('locale.labels.attention') }}", {
-                            closeButton: true,
-                            positionClass: 'toast-top-right',
-                            progressBar: true,
-                            newestOnTop: true,
-                            rtl: isRtl
-                        });
+                    error: function() {
+                        $('#loader').hide(); // Hide loader in case of error
+                        toastr['warning']('{{ __('locale.exceptions.something_went_wrong') }}',
+                            "{{ __('locale.labels.attention') }}", {
+                                closeButton: true,
+                                positionClass: 'toast-top-right',
+                                progressBar: true,
+                                newestOnTop: true,
+                                rtl: isRtl
+                            });
                     }
                 });
             }
 
             // Initial load
+            const initialTabId = activeTab ||
+            'unread-tab'; // Use activeTab from localStorage or default to 'unread-tab'
+            setActiveTab(initialTabId); // Set the active tab based on localStorage or default
             loadChatUsers(page, filter, search);
 
-// Add debounce function to delay the search request
+            // Add debounce function to delay the search request
             function debounce(func, delay) {
                 let timeout;
-                return function (...args) {
+                return function(...args) {
                     clearTimeout(timeout);
                     timeout = setTimeout(() => func.apply(this, args), delay);
                 };
             }
 
-// Filter data by tab
-            $('.tab-button').on('click', function () {
-                // Change the color of the clicked button to primary and reset others
-                $('.tab-button').removeClass('btn-primary').addClass('btn-outline-primary');
-                $(this).removeClass('btn-outline-primary').addClass('btn-primary');
+            // Filter data by tab
+            $('.tab-button').on('click', function() {
+                // Get the tab ID and corresponding filter value
+                const tabId = $(this).attr('id');
+                filter = tabToFilterMap[tabId];
 
-                // Get filter value and reset page
+                // Reset page to 1
                 page = 1;
-                filter = $(this).data('filter');
+
+                // Set the active tab and save it to localStorage
+                setActiveTab(tabId);
+
+                // Load data for the selected filter
                 loadChatUsers(page, filter, search);
             });
 
-// Load more data when "Load More" button is clicked
-            $('#load-more').on('click', function () {
-                page += 1;  // Increment page number
-                loadChatUsers(page, filter, search, true);  // Append new data
+            // Load more data when "Load More" button is clicked
+            $('#load-more').on('click', function() {
+                page += 1; // Increment page number
+                loadChatUsers(page, filter, search, true); // Append new data
             });
 
-// Search functionality with debounce
-            $('#chat-search').on('keyup', debounce(function () {
-                search = $(this).val();  // Get search value
-                page = 1;  // Reset page to 1
+            // Search functionality with debounce
+            $('#chat-search').on('keyup', debounce(function() {
+                search = $(this).val(); // Get search value
+                page = 1; // Reset page to 1
                 loadChatUsers(page, filter, search);
-            }, 500));  // Delay of 500ms
-
+            }, 500)); // Delay of 500ms
         });
 
 
-        $('#users-list').on('scroll', function (e) {
+        $('#users-list').on('scroll', function(e) {
             e.preventDefault();
             let div = $(this).get(0);
             if (div.scrollTop + div.clientHeight >= div.scrollHeight) {
@@ -1406,8 +1483,5 @@ $(document).on("click", ".chat-users-list li", function() {
                 $('#load-more').trigger('click');
             }
         });
-
-
     </script>
 @endsection
-

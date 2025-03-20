@@ -9,20 +9,21 @@
             <button onclick="reloadPage()" id="unread-tab"type="button" class="btn tab-button btn-primary btn-sm"
                 data-filter="unread">Unread
                 <span id="unread_count"
-                class="badge bg-warning rounded-pill float-end notification_count">{{ $unread_chats }}</span>
+                    class="badge bg-warning rounded-pill float-end notification_count">{{ $unread_chats }}</span>
             </button>
-            <button onclick="reloadRead()" id="read-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
+            <button onclick="reloadRead()" id="read-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm"
                 data-filter="read">{{ __('locale.labels.read') }}</button>
-            <button onclick="reloadStarred()" id="starred-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
-                data-filter="starred">starred</button>
+            <button onclick="reloadStarred()" id="starred-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="starred">starred</button>
         </div>
         <div role="group" class="tab-group btn-group mb-2">
-            <button onclick="reloadFollowup()" id="followup-tab"type="button" class="btn tab-button btn-outline-primary btn-sm"
-                data-filter="follow-up">Follow Up</button>
-            <button onclick="reloadUndercontract()" id="undercontract-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
-                data-filter="under-contract">Under Contract</button>
-            <button onclick="reloadFreshlead()" id="freshlead-tab" type="button" class="btn tab-button btn-outline-primary btn-sm"
-                data-filter="fresh-lead">Fresh Lead</button>
+            <button onclick="reloadFollowup()" id="followup-tab"type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="follow-up">Follow Up</button>
+            <button onclick="reloadUndercontract()" id="undercontract-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="under-contract">Under Contract</button>
+            <button onclick="reloadFreshlead()" id="freshlead-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="fresh-lead">Fresh Lead</button>
         </div>
     </div>
 
@@ -110,80 +111,67 @@
         <button class="btn btn-sm btn-primary mt-1" id="load-more"><i data-feather="refresh-cw"></i></button>
     </div>
     <script>
-        function reloadPage() {
-            localStorage.setItem('activeTab', 'unread-tab');
-            //location.reload()
+        // Function to set the active tab and save it to localStorage
+        function setActiveTab(tabId) {
+            // Remove the 'btn-primary' class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+            });
 
-           // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+            // Add the 'btn-primary' class to the active tab button
+            const activeTabButton = document.getElementById(tabId);
+            if (activeTabButton) {
+                activeTabButton.classList.remove('btn-outline-primary');
+                activeTabButton.classList.add('btn-primary');
+            }
 
+            // Save the active tab to localStorage
+            localStorage.setItem('activeTab', tabId);
         }
+
+        // Function to reload the page and set the active tab
+        function reloadPage() {
+            setActiveTab('unread-tab');
+            location.reload();
+        }
+
         function reloadRead() {
-            localStorage.setItem('activeTab', 'read-tab');
-            //location.reload()
-
-           // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('read-tab');
+            location.reload();
         }
 
         function reloadStarred() {
-            localStorage.setItem('activeTab', 'starred-tab');
-            //location.reload()
-            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('starred-tab');
+            location.reload();
         }
 
         function reloadFollowup() {
-            localStorage.setItem('activeTab', 'followup-tab');
-            //location.reload()
-
-            // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('followup-tab');
+            location.reload();
         }
 
         function reloadUndercontract() {
-            localStorage.setItem('activeTab', 'undercontract-tab');
-            //location.reload()
-
-            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('undercontract-tab');
+            location.reload();
         }
 
         function reloadFreshlead() {
-            localStorage.setItem('activeTab', 'freshlead-tab');
-            //location.reload()
-
-            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('freshlead-tab');
+            location.reload();
         }
 
+        // On page load, restore the active tab from localStorage
         window.onload = function() {
             const activeTab = localStorage.getItem('activeTab');
-            const unreadTab = document.getElementById('unread-tab');
-            const readTab = document.getElementById('read-tab');
-            const starredTab = document.getElementById('starred-tab');
 
-            // Remove active classes from all tabs
-            unreadTab.classList.remove('show', 'active');
-            readTab.classList.remove('show', 'active');
-            starredTab.classList.remove('show', 'active');
-
-            // Check if activeTab exists in localStorage
+            // If an active tab is saved in localStorage, set it as active
             if (activeTab && document.getElementById(activeTab)) {
-                // Set the active tab based on the stored value
-                document.getElementById(activeTab).classList.add('active');
-                document.getElementById(activeTab).setAttribute('aria-selected', 'true');
-
-                // Set the corresponding tab pane to active
-                document.querySelector('.tab-pane.show.active')?.classList.remove('show', 'active');
-                document.getElementById(activeTab.replace('-tab', '')).classList.add('show', 'active');
+                setActiveTab(activeTab);
             } else {
-                // Default to the read tab if no active tab is stored
-                readTab.classList.add('active');
-                readTab.setAttribute('aria-selected', 'true');
-                document.getElementById('read').classList.add('show', 'active');
+                // Default to the 'unread-tab' if no active tab is saved
+                setActiveTab('unread-tab');
             }
-
-            localStorage.removeItem('activeTab');
         };
 
 
