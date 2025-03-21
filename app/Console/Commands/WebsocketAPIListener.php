@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use ElephantIO\Client;
 use Illuminate\Console\Command;
 use App\Models\SendingServer;
+use App\Models\PhoneNumbers;
 use App\Services\WebsocketAPI\Handler;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -23,71 +24,129 @@ class WebsocketAPIListener extends Command
      *
      * @var string
      */
-    protected $description = 'sync websocket-api';
+    protected $description = 'Sync websocket-api for multiple accounts and route outgoing messages to the correct sending server';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
+        // Retrieve all sending servers with the WebsocketAPI setting.
         $sendingServers = SendingServer::where('settings', SendingServer::TYPE_WEBSOCKETAPI)->get();
 
+        if ($sendingServers->isEmpty()) {
+            $this->error("No sending servers found with Websocket API settings.");
+            return Command::FAILURE;
+        }
+
+        $clients = [];
+        // For each sending server, attempt to create and connect a WebSocket client.
         foreach ($sendingServers as $server) {
-            // Decode settings if it is a string (likely JSON)
-            if (is_string($server->settings)) {
-                $decodedSettings = json_decode($server->settings, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    Log::warning("Invalid JSON in settings for server ID: {$server->id}");
-                    continue;
-                }
-            } else {
-                $decodedSettings = $server->settings;
+            // Optionally log a warning if device_id is missing.
+            if (empty($server->device_id)) {
+                Log::warning("Server ID {$server->id} has no device_id; outgoing messages will be routed using fallback logic.");
             }
-
-            $server->api_link = $decodedSettings['api_link'] ?? null;
-            $server->auth_token = $decodedSettings['auth_token'] ?? null;
-        }
-
-        Log::info('All sending servers: ' . json_encode($sendingServers));
-
-        // Pull the first sending server.
-        $sendingServer = $sendingServers->first();
-
-        if ($sendingServer) {
-            if (!$sendingServer->api_link || !$sendingServer->auth_token) {
-                $this->error("Missing api_link or auth_token for server ID: {$sendingServer->id}");
-                return Command::FAILURE;
-            }
-
             try {
-                $client = Client::create($sendingServer->api_link . '?apiKey=' . $sendingServer->auth_token);
+                $client = Client::create($server->api_link . '?apiKey=' . $server->auth_token);
                 $client->connect();
-                $this->info('Connected to Websocket API');
-                Log::info('Connected to Websocket API. Process ID: ' . getmypid());
-                Log::info('Current API Link: ' . $sendingServer->api_link);
+                Log::info("Connected to Websocket API for server ID: {$server->id}");
+                $clients[] = [
+                    'server' => $server,
+                    'client' => $client,
+                ];
             } catch (\Exception $e) {
-                $this->error("Failed to connect to server ID: {$sendingServer->id}. Error: " . $e->getMessage());
-                return Command::FAILURE;
+                Log::error("Error connecting for server ID: {$server->id} - " . $e->getMessage());
             }
-
-            // Main loop: poll for outgoing messages and check for incoming packets.
-            while (true) {
-                if ($message = Cache::pull('outgoingSMS')) {
-                    $message = json_decode($message, true);
-                    $client->emit('outgoingSMS', [
-                        'deviceId' => $message['device_id'],
-                        'receiver' => $message['phone'],
-                        'content'  => $message['message'],
-                    ]);
-                }
-                if ($packet = $client->wait(null, 1)) {
-                    new Handler($packet->event, $packet->data);
-                }
-            }
-
-            return Command::SUCCESS;
         }
 
-        return Command::FAILURE;
+        if (empty($clients)) {
+            $this->error("No websocket clients are connected.");
+            return Command::FAILURE;
+        }
+
+        $this->info("Connected to " . count($clients) . " WebSocket API endpoints.");
+
+        // Main loop: process outgoing messages and incoming packets.
+        while (true) {
+            // Outgoing messages: Pull a message from cache and process it.
+            if ($message = Cache::pull('outgoingSMS')) {
+                $decodedMessage = json_decode($message, true);
+                Log::info("Decoded outgoing message: " . json_encode($decodedMessage));
+                
+                // Use 'to' if available; otherwise, fall back to 'phone'
+                $receiver = null;
+                if (isset($decodedMessage['to'])) {
+                    $receiver = trim($decodedMessage['to']);
+                } elseif (isset($decodedMessage['phone'])) {
+                    $receiver = trim($decodedMessage['phone']);
+                }
+                
+                
+                $targetServerId = null;
+                if ($receiver) {
+                    // Look up the PhoneNumbers record for the receiver.
+                    $phoneRecord = PhoneNumbers::where('number', $receiver)->first();
+                    if ($phoneRecord) {
+                        $targetServerId = $phoneRecord->sending_server_id;
+                    } else {
+                        Log::warning("No phone record found for receiver: {$receiver}");
+                    }
+                }
+                
+                // Fallback: if no phone record is found, use the device_id from the cached message.
+                if (!$targetServerId) {
+                    $targetDeviceId = trim($decodedMessage['device_id'] ?? '');
+                    if ($targetDeviceId) {
+                        $deviceIdRecord = PhoneNumbers::where('device_id', $device_id)->first();
+                        foreach ($clients as $entry) {
+                            if ($entry['server']->device_id === $targetDeviceId) {
+                                $targetServerId = $entry['server']->id;
+                                break;
+                            }
+                        }
+                        if (!$targetServerId) {
+                            Log::warning("No sending server matches the fallback device_id: {$targetDeviceId}");
+                        }
+                    } else {
+                        Log::warning("Outgoing message missing both receiver and device_id. Skipping emission.");
+                    }
+                }
+                
+                if ($targetServerId) {
+                    // Emit the outgoing message only on the client that matches the target sending server.
+                    foreach ($clients as $entry) {
+                        if ($entry['server']->id == $targetServerId) {
+                            try {
+                                $entry['client']->emit('outgoingSMS', [
+                                    'deviceId' => $decodedMessage['device_id'] ?? '',
+                                    'receiver' => $decodedMessage['phone'] ?? '',
+                                    'content'  => $decodedMessage['message'] ?? '',
+                                ]);
+                            } catch (\Exception $e) {
+                                Log::error("Error emitting outgoingSMS on server ID " . $entry['server']->id . ": " . $e->getMessage());
+                                // Optionally requeue the message for retry.
+                                Cache::put('outgoingSMS', json_encode($decodedMessage), now()->addSeconds(30));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Incoming messages: Check each client connection for a packet.
+            foreach ($clients as $entry) {
+                try {
+                    if ($packet = $entry['client']->wait(null, 1)) {
+                        // Pass all incoming packets to the Handler.
+                        new Handler($packet->event, $packet->data);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Error processing incoming packet on server ID " . $entry['server']->id . ": " . $e->getMessage());
+                }
+            }
+
+            usleep(50000); // Sleep 50ms to prevent CPU overuse.
+        }
+
+        return Command::SUCCESS;
     }
 }
