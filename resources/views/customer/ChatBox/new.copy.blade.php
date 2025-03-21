@@ -47,7 +47,7 @@
                                                        class="form-label required">{{ __('locale.labels.sending_server') }}</label>
                                                 <select class="select2 form-select" name="sending_server">
                                                     @foreach($sendingServers as $server)
-                                                        @if(isset($server->sendingServer) && $server->sendingServer->status == 1 && $server->sendingServer->two_way)
+                                                        @if(isset($server->sendingServer) && $server->sendingServer->two_way)
                                                             <option value="{{$server->sendingServer->id}}"> {{ $server->sendingServer->name }}</option>
                                                         @endif
                                                     @endforeach

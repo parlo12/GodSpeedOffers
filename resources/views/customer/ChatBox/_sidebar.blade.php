@@ -1,35 +1,39 @@
-@php
-    use App\Helpers\Helper;
-    use App\Library\Tool;
-@endphp
-<style>
-    .chat-list-scrollable {
-        max-height: 50vh;
-        overflow-y: auto;
-    }
-
-    @media (min-height: 800px) {
-
-        .chat-list-scrollable {
-            max-height: 70vh;
-            color: red;
-        }
-    }
-</style>
-<!-- Chat Sidebar area -->
 <div class="sidebar-content">
+
     <span class="sidebar-close-icon">
         <i data-feather="x"></i>
     </span>
 
+    <div class="text-center pt-1 pb-1">
+        <div role="group" class="tab-group btn-group mb-2">
+            <button onclick="reloadPage()" id="unread-tab"type="button" class="btn tab-button btn-primary btn-sm"
+                data-filter="unread">Unread
+                <span id="unread_count"
+                    class="badge bg-warning rounded-pill float-end notification_count">{{ $unread_chats }}</span>
+            </button>
+            <button onclick="reloadRead()" id="read-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm"
+                data-filter="read">{{ __('locale.labels.read') }}</button>
+            <button onclick="reloadStarred()" id="starred-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="starred">starred</button>
+        </div>
+        <div role="group" class="tab-group btn-group mb-2">
+            <button onclick="reloadFollowup()" id="followup-tab"type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="follow-up">Follow Up</button>
+            <button onclick="reloadUndercontract()" id="undercontract-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="under-contract">Under Contract</button>
+            <button onclick="reloadFreshlead()" id="freshlead-tab" type="button"
+                class="btn tab-button btn-outline-primary btn-sm" data-filter="fresh-lead">Fresh Lead</button>
+        </div>
+    </div>
 
     <!-- Sidebar header start -->
     <div class="chat-fixed-search">
         <div class="d-flex align-items-center w-100">
             <div class="input-group input-group-merge ms-1 w-100">
                 <span class="input-group-text round"><i data-feather="search" class="text-muted"></i></span>
-                <input type="text" class="form-control round" id="chat-search-new"
-                    placeholder="Enter number and press enter">
+                <input type="text" class="form-control round" id="chat-search"
+                    placeholder="{{ __('locale.labels.search') }}">
             </div>
             <div class="d-block d-md-none">
                 <a href="{{ route('customer.chatbox.new') }}" class="text-dark ms-1"><i data-feather="plus-circle"></i>
@@ -39,391 +43,135 @@
     </div>
     <!-- Sidebar header end -->
 
-    <!-- Sidebar Users start -->
-    <div class="chat-tabs">
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs" id="chatTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link " id="read-tab" data-bs-toggle="tab" href="#read" role="tab"
-                    aria-controls="read" aria-selected="false">Read</a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a onclick="reloadPage()" class="nav-link" id="unread-tab" data-bs-toggle="tab" href="#unread"
-                    role="tab" aria-controls="unread" aria-selected="false">Unread
-                    <span id="unread_count"
-                        class="badge bg-primary rounded-pill float-end notification_count">{{ $unread_chats }}</span>
-                </a>
-
-
-            </li>
-            <li onclick="reloadStarred()" class="nav-item" role="presentation">
-                <a class="nav-link" id="starred-tab" data-bs-toggle="tab" href="#starred" role="tab"
-                    aria-controls="starred" aria-selected="false">Starred</a>
-            </li>
-            <li onclick="reloadFollowup()" class="nav-item" role="presentation">
-                <a class="nav-link" id="followup-tab" data-bs-toggle="tab" href="#followup" role="tab"
-                    aria-controls="followup" aria-selected="false">Followup</a>
-            </li>
-            <li onclick="reloadUndercontract()" class="nav-item" role="presentation">
-                <a class="nav-link" id="undercontract-tab" data-bs-toggle="tab" href="#undercontract" role="tab"
-                    aria-controls="undercontract" aria-selected="false">Under Contract</a>
-            </li>
-            <li onclick="reloadFreshlead()" class="nav-item" role="presentation">
-                <a class="nav-link" id="freshlead-tab" data-bs-toggle="tab" href="#freshlead" role="tab"
-                    aria-controls="freshlead" aria-selected="false">Fresh Lead</a>
-            </li>
-
-        </ul>
-
-        <!-- Tab content -->
-        <div class="tab-content" id="chatTabsContent">
-            <!-- Read Tab -->
-            <div class="tab-pane fade show active" id="read" role="tabpanel" aria-labelledby="read-tab">
-                <div id="read-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
-                    <ul class="chat-users-list chat-list media-list">
-                        @foreach ($chat_box as $chat)
-                            @if ($chat->notification == 0)
-                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
-                                    <span class="avatar">
-                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
-                                            width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
-                                        <p class="card-text text-truncate">
-                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
-                                        </p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small
-                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
-                                        @if ($chat->notification)
-                                            <span
-                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
-                                        @endif
-                                        <button type="button"
-                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
-                                            onclick="toggleStar('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
-                                            <i data-feather="star"
-                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
-                                    </div>
-                                </li>
-                            @endif
-                        @endforeach
-                        <br>
-                        <div class="pagination ">
-                            {{ $chat_box->links() }}
-                        </div>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Unread Tab -->
-            <div class="tab-pane fade" id="unread" role="tabpanel" aria-labelledby="unread-tab">
-                <div id="unread-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
-                    <ul class="chat-users-list chat-list media-list">
-                        @foreach ($unread_box as $chat)
-                            @if ($chat->notification > 0)
-                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
-                                    <span class="avatar">
-                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
-                                            width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
-                                        <p class="card-text text-truncate">
-                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
-                                        </p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small
-                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
-                                        @if ($chat->notification)
-                                            <span
-                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
-                                        @endif
-                                        <button type="button"
-                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
-                                            onclick="toggleStar('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
-                                            <i data-feather="star"
-                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
-                                    </div>
-                                </li>
-                            @endif
-                        @endforeach
-                        <br>
-                        <div class="pagination">
-                            {{ $unread_box->links() }}
-                        </div>
-                    </ul>
-                </div>
-
-            </div>
-
-            <!-- Starred Tab -->
-            <div class="tab-pane fade" id="starred" role="tabpanel" aria-labelledby="starred-tab">
-                <div id="starred-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
-                    <ul class="chat-users-list chat-list media-list">
-                        @foreach ($starred_box as $chat)
-                            @if ($chat->is_starred)
-                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
-                                    <span class="avatar">
-                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
-                                            width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
-                                        <p class="card-text text-truncate">
-                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
-                                        </p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small
-                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
-                                        @if ($chat->notification)
-                                            <span
-                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
-                                        @endif
-                                        <button type="button"
-                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
-                                            onclick="toggleStar('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
-                                            <i data-feather="star"
-                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
-
-                                    </div>
-                                </li>
-                            @endif
-                        @endforeach
-                        <br>
-                        <div class="pagination">
-                            {{ $starred_box->links() }}
-                        </div>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Follow tab -->
-            <div class="tab-pane fade" id="followup" role="tabpanel" aria-labelledby="followup-tab">
-                <div id="followup-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
-                    <ul class="chat-users-list chat-list media-list">
-                        @foreach ($follow_up as $chat)
-                            @if ($chat->follow_up)
-                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
-                                    <span class="avatar">
-                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
-                                            width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
-                                        <p class="card-text text-truncate">
-                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
-                                        </p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small
-                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
-                                        @if ($chat->notification)
-                                            <span
-                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
-                                        @endif
-
-                                        <button type="button"
-                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
-                                            onclick="toggleStar('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
-                                            <i data-feather="star"
-                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
-                                        {{-- <button type="button"
-                                            class="btn  {{ $chat->follow_up ? 'bg-danger' : '' }} p-0 star-btn float-end"
-                                            onclick="removeFollowup('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->follow_up ? 'remove' : 'Mark as Starred' }}">
-                                            <i data-feather="trash-2"
-                                                class="cursor-pointer font-medium-2  {{ $chat->follow_up ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button> --}}
-                                    </div>
-                                </li>
-                            @endif
-                        @endforeach
-                        <br>
-                        <div class="pagination">
-                            {{ $follow_up->links() }}
-                        </div>
-                    </ul>
-                 
-                </div>
-            </div>
-
-            <!-- Under contract tab -->
-            <div class="tab-pane fade" id="undercontract" role="tabpanel" aria-labelledby="undercontract-tab">
-                <div id="undercontract-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
-                    <ul class="chat-users-list chat-list media-list">
-                        @foreach ($under_contract as $chat)
-                            @if ($chat->under_contract)
-                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
-                                    <span class="avatar">
-                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
-                                            width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
-                                        <p class="card-text text-truncate">
-                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
-                                        </p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small
-                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
-                                        @if ($chat->notification)
-                                            <span
-                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
-                                        @endif
-
-                                        <button type="button"
-                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
-                                            onclick="toggleStar('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
-                                            <i data-feather="star"
-                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
-                                        {{-- <button type="button"
-                                            class="btn  {{ $chat->under_contract ? 'bg-danger' : '' }} p-0 star-btn float-end"
-                                            onclick="removeUnderContract('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->under_contract ? 'remove' : 'Mark as Starred' }}">
-                                            <i data-feather="trash-2"
-                                                class="cursor-pointer font-medium-2  {{ $chat->under_contract ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button> --}}
-                                    </div>
-                                </li>
-                            @endif
-                        @endforeach
-                        <br>
-                        <div class="pagination">
-                            {{ $under_contract->links() }}
-                        </div>
-                    </ul>
-                 
-                </div>
-            </div>
-            <!-- Fresh Lead tab -->
-            <div class="tab-pane fade" id="freshlead" role="tabpanel" aria-labelledby="freshlead-tab">
-                <div id="freshlead-users-list" class="chat-user-list-wrapper list-group chat-list-scrollable">
-                    <ul class="chat-users-list chat-list media-list">
-                        @foreach ($fresh_lead as $chat)
-                            @if ($chat->fresh_lead)
-                                <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
-                                    <span class="avatar">
-                                        <img src="{{ asset('images/profile/profile.jpg') }}" height="36"
-                                            width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">{{ \App\Helpers\Helper::contact_name1($chat->to) }}</h5>
-                                        <p class="card-text text-truncate">
-                                            {{ \Illuminate\Support\Str::limit(\App\Helpers\Helper::last_message($chat->id), 15) }}
-                                        </p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small
-                                            class="float-end mb-25 chat-time">{{ Tool::customerDateTime($chat->updated_at) }}</small>
-                                        @if ($chat->notification)
-                                            <span
-                                                class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
-                                        @endif
-
-                                        <button type="button"
-                                            class="btn  {{ $chat->is_starred ? 'bg-warning' : '' }} p-0 star-btn float-end"
-                                            onclick="toggleStar('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->is_starred ? 'Unmark as Starred' : 'Mark as Starred' }}">
-                                            <i data-feather="star"
-                                                class="cursor-pointer font-medium-2  {{ $chat->is_starred ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button>
-                                        {{-- <button type="button"
-                                            class="btn  {{ $chat->fresh_lead ? 'bg-danger' : '' }} p-0 star-btn float-end"
-                                            onclick="removeFreshLead('{{ $chat->uid }}', this)"
-                                            title="{{ $chat->fresh_lead ? 'remove' : 'Mark as Starred' }}">
-                                            <i data-feather="trash-2"
-                                                class="cursor-pointer font-medium-2  {{ $chat->fresh_lead ? 'text-white' : 'text-secondary' }}"></i>
-                                        </button> --}}
-                                    </div>
-                                </li>
-                            @endif
-                        @endforeach
-                        <br>
-                        <div class="pagination">
-                            {{ $fresh_lead->links() }}
-                        </div>
-                    </ul>
-                 
-                </div>
-            </div>
+    <!-- Loader -->
+    <div id="loader" class="text-center" style="display:none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only"></span>
         </div>
+    </div>
 
+    <!-- Sidebar Users start -->
+    <div id="users-list" class="chat-user-list-wrapper list-group mb-4">
+
+        {{-- @if ($pinnedChats->count() > 0)
+            <h4 class="chat-list-title">{{ __('locale.labels.pin') }}</h4>
+
+            <ul class="chat-users-list-pinned chat-list media-list">
+                @foreach ($pinnedChats as $chat)
+                    <li data-id="{{ $chat->uid }}" data-box-id="{{ $chat->id }}">
+                        <span class="avatar">
+                            <img src="{{ asset('images/profile/profile.jpg') }}" height="36" width="54"
+                                alt="Avatar" />
+                        </span>
+                        <div class="chat-info flex-grow-1">
+                            <h6 class="mb-0">{{ $chat->to }}</h6>
+                            @if (!empty($chat->contact) && !empty($chat->contact->getFullName()))
+                                <p class="card-text mb-0 text-truncate">
+                                    {{ str_limit($chat->contact->getFullName(), 15) }}
+                                </p>
+                            @endif
+                            <p class="card-text mb-0 text-truncate">
+                                {{ $chat->from }}
+                            </p>
+
+                            @if (!empty($chat->chatBoxMessages) && !empty($chat->chatBoxMessages->last()->message))
+                                <p class="card-text mb-0 text-truncate">
+                                    {{ str_limit($chat->chatBoxMessages->last()->message, 18) }}
+                                </p>
+                            @endif
+                        </div>
+                        <div class="chat-meta text-nowrap">
+                            <small
+                                class="float-end mb-25 chat-time">{{ \App\Library\Tool::customerDateTime($chat->updated_at) }}</small>
+                            @if ($chat->notification)
+                                <span
+                                    class="badge bg-primary rounded-pill float-end notification_count">{{ $chat->notification }}</span>
+                            @else
+                                <div class="counter" hidden>
+                                    <span class="badge bg-primary rounded-pill float-end notification_count"></span>
+                                </div>
+                            @endif
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+
+            <h4 class="chat-list-title">{{ __('locale.labels.chats') }}</h4>
+
+        @endif --}}
+
+        <ul class="chat-users-list chat-list media-list">
+            <!-- Chat users will be loaded here via Ajax -->
+        </ul>
+    </div>
+    <!-- Sidebar Users end -->
+
+    <!-- Load More button -->
+    <div class="text-center" id="load-more-wrapper" style="display:none;">
+        <button class="btn btn-sm btn-primary mt-1" id="load-more"><i data-feather="refresh-cw"></i></button>
     </div>
     <script>
-        function reloadPage() {
-            localStorage.setItem('activeTab', 'unread-tab');
-            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
+        // Function to set the active tab and save it to localStorage
+        function setActiveTab(tabId) {
+            // Remove the 'btn-primary' class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+            });
 
+            // Add the 'btn-primary' class to the active tab button
+            const activeTabButton = document.getElementById(tabId);
+            if (activeTabButton) {
+                activeTabButton.classList.remove('btn-outline-primary');
+                activeTabButton.classList.add('btn-primary');
+            }
+
+            // Save the active tab to localStorage
+            localStorage.setItem('activeTab', tabId);
+        }
+
+        // Function to reload the page and set the active tab
+        function reloadPage() {
+            setActiveTab('unread-tab');
+            location.reload();
+        }
+
+        function reloadRead() {
+            setActiveTab('read-tab');
+            location.reload();
         }
 
         function reloadStarred() {
-            localStorage.setItem('activeTab', 'starred-tab');
-            window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('starred-tab');
+            location.reload();
         }
 
         function reloadFollowup() {
-            localStorage.setItem('activeTab', 'followup-tab');
-            // window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('followup-tab');
+            location.reload();
         }
 
         function reloadUndercontract() {
-            localStorage.setItem('activeTab', 'undercontract-tab');
-            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('undercontract-tab');
+            location.reload();
         }
 
         function reloadFreshlead() {
-            localStorage.setItem('activeTab', 'freshlead-tab');
-            //window.location.href = "https://www.godspeedoffers.com/chat-box?page=1";
-
+            setActiveTab('freshlead-tab');
+            location.reload();
         }
 
+        // On page load, restore the active tab from localStorage
         window.onload = function() {
             const activeTab = localStorage.getItem('activeTab');
-            const unreadTab = document.getElementById('unread-tab');
-            const readTab = document.getElementById('read-tab');
-            const starredTab = document.getElementById('starred-tab');
 
-            // Remove active classes from all tabs
-            unreadTab.classList.remove('show', 'active');
-            readTab.classList.remove('show', 'active');
-            starredTab.classList.remove('show', 'active');
-
-            // Check if activeTab exists in localStorage
+            // If an active tab is saved in localStorage, set it as active
             if (activeTab && document.getElementById(activeTab)) {
-                // Set the active tab based on the stored value
-                document.getElementById(activeTab).classList.add('active');
-                document.getElementById(activeTab).setAttribute('aria-selected', 'true');
-
-                // Set the corresponding tab pane to active
-                document.querySelector('.tab-pane.show.active')?.classList.remove('show', 'active');
-                document.getElementById(activeTab.replace('-tab', '')).classList.add('show', 'active');
+                setActiveTab(activeTab);
             } else {
-                // Default to the read tab if no active tab is stored
-                readTab.classList.add('active');
-                readTab.setAttribute('aria-selected', 'true');
-                document.getElementById('read').classList.add('show', 'active');
+                // Default to the 'unread-tab' if no active tab is saved
+                setActiveTab('unread-tab');
             }
-
-            localStorage.removeItem('activeTab');
         };
 
 
@@ -433,7 +181,7 @@
                 method: 'GET',
                 success: function(response) {
                     console.log(response)
-                    $('#unread_count').html(response.unread_chats ? response.unread_chats : '');
+                    $('#unread_count').html(response.unread_chats ? response.unread_chats : '0');
 
                 }
             });
@@ -474,6 +222,13 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
+                        toastr['success'](response.message, 'Success!!', {
+                            closeButton: true,
+                            positionClass: 'toast-top-right',
+                            progressBar: true,
+                            newestOnTop: true,
+                            rtl: isRtl
+                        });
                         location.reload()
                         // Toggle the star icon
                     } else {
@@ -494,6 +249,13 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
+                        toastr['success'](response.message, 'Success!!', {
+                            closeButton: true,
+                            positionClass: 'toast-top-right',
+                            progressBar: true,
+                            newestOnTop: true,
+                            rtl: isRtl
+                        });
                         location.reload()
                         // Toggle the star icon
                     } else {
@@ -514,6 +276,13 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
+                        toastr['success'](response.message, 'Success!!', {
+                            closeButton: true,
+                            positionClass: 'toast-top-right',
+                            progressBar: true,
+                            newestOnTop: true,
+                            rtl: isRtl
+                        });
                         location.reload()
                         // Toggle the star icon
                     } else {
@@ -521,77 +290,5 @@
                     }
                 }).catch(error => console.error('Error:', error));
         }
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatSearchInput = document.getElementById('chat-search-new');
-
-            chatSearchInput.addEventListener('keydown', function(event) {
-                // Check if the Enter key is pressed (key code 13 or 'Enter')
-                if (event.key === 'Enter') {
-                    const query = chatSearchInput.value;
-
-                    // Only make the AJAX request if the search term is not empty
-                    if (query.length > 0) {
-                        fetch(`/chat-box/search-chats?query=${query}`, {
-                                method: 'GET',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Content-Type': 'application/json',
-                                },
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                // Clear the current chat list
-                                const chatList = document.querySelector('.chat-list');
-                                chatList.innerHTML = '';
-
-                                // Check if there are results
-                                if (data.length > 0) {
-                                    data.forEach(chat => {
-                                        var updated_at = chat.updated_at;
-
-                                        var last_message = @json(\Illuminate\Support\Str::limit(addslashes(\App\Helpers\Helper::last_message($chat->id)), 15));
-                                        var name = @json(\App\Helpers\Helper::contact_name1($chat->to));
-                                        const listItem = `
-                                <li data-id="${chat.uid}" data-box-id="${chat.id}">
-                                    <span class="avatar">
-                                        <img src="${chat.avatar ? chat.avatar : '{{ asset('images/profile/profile.jpg') }}'}" height="36" width="54" alt="Avatar" />
-                                    </span>
-                                    <div class="chat-info flex-grow-1">
-                                        <h5 class="mb-0">${chat.name}</h5>
-                                        <p class="card-text text-truncate">${chat.last_message}</p>
-                                    </div>
-                                    <div class="chat-meta text-nowrap">
-                                        <small class="float-end mb-25 chat-time">${chat.updated_at}</small>
-                                        ${chat.notification ? `<span class="badge bg-primary rounded-pill float-end notification_count">${chat.notification}</span>` : ''}
-                                        <button type="button" class="btn ${chat.is_starred ? 'bg-warning' : ''} p-0 star-btn float-end" onclick="toggleStar('${chat.uid}', this)" title="${chat.is_starred ? 'Unmark as Starred' : 'Mark as Starred'}">
-                                            <i data-feather="star" class="cursor-pointer font-medium-2 ${chat.is_starred ? 'text-white' : 'text-secondary'}"></i>
-                                        </button>
-                                    </div>
-                                </li>`;
-                                        chatList.insertAdjacentHTML('beforeend', listItem);
-                                    });
-
-                                    // Reinitialize feather icons after dynamically adding content
-                                    if (typeof feather !== 'undefined') {
-                                        feather.replace();
-                                    }
-                                } else {
-                                    // Display "No results" if no matches are found
-                                    chatList.innerHTML =
-                                        '<li class="no-results show">No results found</li>';
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error retrieving search results:', error);
-                            });
-                    } else {
-                        // Clear search results if the query is empty
-                        document.querySelector('.chat-list').innerHTML = '';
-                    }
-                }
-            });
-        });
     </script>
-    <!-- Sidebar Users end -->
 </div>
-<!--/ Chat Sidebar area -->

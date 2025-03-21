@@ -66,20 +66,6 @@
                 height: auto;
             }
         }
-
-        .preserve-whitespace {
-            white-space: pre-wrap;
-        }
-
-        .chat-content {
-            word-break: break-word;
-            /* Ensures long words break and don't overflow */
-        }
-
-        .chat-time {
-            word-break: break-word;
-            /* Apply wrapping for the timestamp */
-        }
     </style>
 
 @endsection
@@ -175,11 +161,10 @@
 
                             <!-- Add Note Tab -->
                             <div class="tab-pane fade" id="add-note" role="tabpanel" aria-labelledby="add-note-tab">
-
+                                here
                             </div>
                             {{-- Follow up --}}
-                            <div class="tab-pane fade show " id="follow-up" role="tabpanel"
-                                aria-labelledby="follow-up-tab">
+                            <div class="tab-pane fade show " id="follow-up" role="tabpanel" aria-labelledby="follow-up-tab">
 
                             </div>
                             {{-- Under  --}}
@@ -235,7 +220,6 @@
             </form>
             <!--/ Submit Chat form -->.
         </div>
-
         <!--/ Active Chat -->
     </section>
     <!--/ Main chat area -->
@@ -256,13 +240,6 @@
     @endif
 
     <script>
-        document.getElementById('file-upload').addEventListener('change', function() {
-            let fileName = this.files[0] ? this.files[0].name : '';
-            let clippedFileName = fileName.length > 10 ? fileName.slice(0, 10) + '...' : fileName;
-            document.getElementById('file-name').textContent = clippedFileName;
-        });
-
-
         // autoscroll to bottom of Chat area
         let chatContainer = $(".user-chats"),
             details,
@@ -344,6 +321,132 @@
                 }
             });
         });
+
+
+        $(document).ready(function() {
+            // Cache chat container elements
+            const chatHistory = $('.chat_history');
+            const chatContainer = $('.user-chats .chats');
+
+            // Use event delegation to bind click events to dynamically loaded users
+            $("#users-list").on("click", ".chat-users-list li, .chat-users-list-pinned li", function() {
+                chatHistory.empty(); // Clear previous chat messages
+                chatContainer.animate({
+                    scrollTop: chatContainer[0].scrollHeight
+                }, 0); // Scroll to the bottom initially
+
+                $(this).find('.notification_count').remove();
+
+                const chat_id = $(this).data('id'); // Get the clicked chat ID
+
+                $(".chat-users-list li, .chat-users-list-pinned li").removeClass("active");
+                $(this).addClass("active");
+
+                // Fetch messages via POST request
+                $.post(
+                        `{{ url('/chat-box') }}/${chat_id}/messages`, {
+                            _token: "{{ csrf_token() }}"
+                        }
+                    )
+                    .done(function(response) {
+
+
+                        let details =
+                            `<input type="hidden" value="${chat_id}" name="chat_id" class="chat_id">`,
+                            addToPin = $('.add-to-pin');
+
+                        // Parse the response data
+                        const cwData = JSON.parse(response.data);
+
+
+                        if (response.starred === 1) {
+                            addToPin.attr('title', '{{ __('locale.labels.unpin') }}');
+
+                            addToPin.tooltip('dispose').tooltip();
+
+
+                            // Find the <i> element and change the data-feather attribute to 'delete'
+                            addToPin.find('svg').remove(); // Remove the old <i> element
+                            addToPin.append(
+                                '<i data-feather="delete" class="cursor-pointer font-medium-2 mx-1 text-danger"></i>'
+                            );
+
+                            // Re-initialize Feather icons to update
+                            feather.replace();
+                        } else {
+                            addToPin.attr('title', '{{ __('locale.labels.pin') }}');
+
+                            addToPin.tooltip('dispose').tooltip();
+
+                            // Find the <i> element and change the data-feather attribute to 'edit-2'
+                            addToPin.find('svg').remove(); // Remove the old <i> element
+                            addToPin.append(
+                                '<i data-feather="edit-2" class="cursor-pointer font-medium-2 mx-1 text-info"></i>'
+                            );
+
+                            // Re-initialize Feather icons to update
+                            feather.replace();
+                        }
+
+
+                        // Loop through messages and render them
+                        cwData.forEach((sms) => {
+                            let media_url = '';
+                            if (sms.media_url !== null) {
+                                let fileType = isImageOrVideo(sms.media_url);
+                                if (fileType === 'video') {
+                                    media_url =
+                                        `<p><video src="${sms.media_url}" controls>Your browser does not support the video tag.</video></p>`;
+                                } else if (fileType === 'audio') {
+                                    media_url =
+                                        `<p><audio src="${sms.media_url}" controls>Your browser does not support the audio element.</audio></p>`;
+                                } else {
+                                    media_url =
+                                        `<p><img src="${sms.media_url}" alt="media" /></p>`;
+                                }
+                            }
+
+                            let message = sms.message ? `<p>${sms.message}</p>` : '';
+
+                            const chatHtml = `
+                <div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
+                    <div class="chat-avatar">
+                        <span class="avatar box-shadow-1 cursor-pointer">
+                            <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36" />
+                        </span>
+                    </div>
+                    <div class="chat-body">
+                        <div class="chat-content">
+                            ${media_url}
+                            ${message}
+                            <p class="chat-time text-muted mt-1">${sms.created_at}</p>
+                        </div>
+                    </div>
+                </div>`;
+
+                            details += chatHtml;
+                        });
+
+                        // Append the chat messages to the chat history
+                        chatHistory.append(details);
+                        chatContainer.animate({
+                            scrollTop: chatContainer[0].scrollHeight
+                        }, 400); // Scroll to bottom of chat after loading
+
+                        // Show the active chat area
+                        $('.start-chat-area').addClass(
+                            'd-none'); // Hide the initial "Start chat" screen
+                        $('.active-chat').removeClass('d-none'); // Show the chat area
+                        $('.counter').hide();
+
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.error("Error loading messages:", error);
+                    });
+            });
+        });
+
+        // ***********************
         let messageInterval; // Declare the variable to hold the interval
 
         function startMessagePulling(chat_id) {
@@ -379,14 +482,14 @@
                             } else {
                                 // For other file types, provide a downloadable link
                                 media_url = `
-    <p>
-        <a class="text-white" href="${sms.media_url}" download>
-            <img src="https://godspeedoffers.com/mms/document.png" alt="Download file" class="cursor-pointer" style="width: 100%; height: auto;"/>
-            <span class="text-wrap" style="max-width: calc(100% - 30px);"> <!-- Adjust max-width based on image width -->
-            ${sms.media_url} 
-        </span>
-        </a>
-    </p>`;
+<p>
+    <a class="text-white" href="${sms.media_url}" download>
+        <img src="https://godspeedoffers.com/mms/document.png" alt="Download file" class="cursor-pointer" style="width: 100%; height: auto;"/>
+        <span class="text-wrap" style="max-width: calc(100% - 30px);"> <!-- Adjust max-width based on image width -->
+        ${sms.media_url} 
+    </span>
+    </a>
+</p>`;
                             }
                         }
 
@@ -397,19 +500,19 @@
                         }
 
                         const chatHtml = `<div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
-                <div class="chat-avatar">
-                    <span class="avatar box-shadow-1 cursor-pointer">
-                        <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36"/>
-                    </span>
+            <div class="chat-avatar">
+                <span class="avatar box-shadow-1 cursor-pointer">
+                    <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36"/>
+                </span>
+            </div>
+            <div class="chat-body">
+                <div class="chat-content">
+                    ${media_url}
+                    ${message}
+                    <p class="chat-time text-muted mt-1">${sms.created_at}</p>
                 </div>
-                <div class="chat-body">
-                    <div class="chat-content">
-                        ${media_url}
-                        ${message}
-                        <p class="chat-time text-muted mt-1">${sms.created_at}</p>
-                    </div>
-                </div>
-            </div>`;
+            </div>
+        </div>`;
 
                         details += chatHtml;
                     });
@@ -465,12 +568,12 @@
                             } else {
                                 // For other file types, provide a downloadable link
                                 media_url = `
-    <p>
-        <a class="text-secondary" href="${sms.media_url}" download>
-            <img src="https://godspeedoffers.com/mms/document.png" alt="Download file" class="cursor-pointer" style="width: 100%; height: auto;"/>
-            Doc
-        </a>
-    </p>`;
+<p>
+    <a class="text-secondary" href="${sms.media_url}" download>
+        <img src="https://godspeedoffers.com/mms/document.png" alt="Download file" class="cursor-pointer" style="width: 100%; height: auto;"/>
+        Doc
+    </a>
+</p>`;
                             }
                         }
 
@@ -482,19 +585,19 @@
                         }
 
                         const chatHtml = `<div class="chat ${sms.send_by === 'to' ? 'chat-left' : ''}">
-                    <div class="chat-avatar">
-                        <span class="avatar box-shadow-1 cursor-pointer">
-                            <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36"/>
-                        </span>
+                <div class="chat-avatar">
+                    <span class="avatar box-shadow-1 cursor-pointer">
+                        <img src="{{ asset('images/profile/profile.jpg') }}" alt="avatar" height="36" width="36"/>
+                    </span>
+                </div>
+                <div class="chat-body">
+                    <div class="chat-content text-wrap">
+                        ${media_url}
+                        ${message}
+                        <p class="chat-time text-muted mt-1">${sms.created_at}</p>
                     </div>
-                    <div class="chat-body">
-                        <div class="chat-content text-wrap">
-                            ${media_url}
-                            ${message}
-                            <p class="chat-time text-muted mt-1">${sms.created_at}</p>
-                        </div>
-                    </div>
-                </div>`;
+                </div>
+            </div>`;
 
                         details += chatHtml;
                     });
@@ -516,34 +619,34 @@
 
                     // Populate the form with response data
                     document.getElementById('follow-up').innerHTML = `
-        <form id="pipeline-form">
-            <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
-            <div class="mb-1">
-                <label for="user-org" class="form-label">User & Org</label>
-                <select required class="form-select" id="user-id" name="user_id">
-                    <option selected>Assign To</option>
-                    ${response.user_and_orgs.map(user_org => `
-                          <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
-                    ).join('')}
-                </select>
-                <label for=crm_user" class="form-label">CRM User</label>
-                <select required class="form-select" id="crm-user" name="crm_user">
-                    <option selected>Select CRM user</option>
-                    ${response.crm_users.map(crm_user => `
-                          <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
-                    ).join('')}
-                </select>
-                <label for="pipeline" class="form-label">Pipeline</label>
-                <select required class="form-select" id="pipeline" name="pipeline">
-                    <option selected>Choose Pipeline</option>
-                    <option value="follow_up">Follow Up</option>
-                    <option value="under_contract">Under Contract</option>
-                    <option value="fresh_lead">Fresh Lead</option>
+    <form id="pipeline-form">
+        <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
+        <div class="mb-1">
+            <label for="user-org" class="form-label">User & Org</label>
+            <select required class="form-select" id="user-id" name="user_id">
+                <option selected>Assign To</option>
+                ${response.user_and_orgs.map(user_org => `
+                              <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                ).join('')}
+            </select>
+            <label for=crm_user" class="form-label">CRM User</label>
+            <select required class="form-select" id="crm-user" name="crm_user">
+                <option selected>Select CRM user</option>
+                ${response.crm_users.map(crm_user => `
+                              <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
+                ).join('')}
+            </select>
+            <label for="pipeline" class="form-label">Pipeline</label>
+            <select required class="form-select" id="pipeline" name="pipeline">
+                <option selected>Choose Pipeline</option>
+                <option value="follow_up">Follow Up</option>
+                <option value="under_contract">Under Contract</option>
+                <option value="fresh_lead">Fresh Lead</option>
 
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Add To Pipeline</button>
-        </form>`;
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add To Pipeline</button>
+    </form>`;
                     // Add event listener for form submission
                     $(document).ready(function() {
 
@@ -559,15 +662,16 @@
                                 },
                                 success: function(response) {
                                     toastr['success'](response.message,
-                                    'Success!!', {
-                                        closeButton: true,
-                                        positionClass: 'toast-top-right',
-                                        progressBar: true,
-                                        newestOnTop: true,
-                                        rtl: isRtl
-                                    });
+                                        'Success!!', {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
                                     console.log('Pipeline updated successfully:',
                                         response);
+                                    location.reload()
                                 },
                                 error: function(xhr, status, error) {
                                     toastr['warning']('Server Error',
@@ -596,46 +700,46 @@
 
                     // Populate the form with response data
                     document.getElementById('update-contact').innerHTML = `
-        <form id="update-contact-form">
-            <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
-            <div class="mb-1">
-                <label for="first-name" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="first-name" name="first_name" value="${response.first_name}">
-            </div>
-            <div class="mb-1">
-                <label for="last-name" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="last-name" name="last_name" value="${response.last_name}">
-            </div>
-            <div class="mb-1">
-                <label for="user-org" class="form-label">User & Org</label>
-                <select class="form-select" id="user-org" name="user_org">
-                    <option selected>Select org</option>
-                    ${response.user_and_orgs.map(user_org => `
-                                                                                    <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
-                    ).join('')}
-                </select>
-            </div>
-            <div class="mb-1">
-                <label for="leadStatus" class="form-label">Lead Status</label>
-                <select class="form-select" id="leadStatus" name="lead_status">
-                    <option selected>Select Status</option>
-                    <option value="1">Offer Made</option>
-                    <option value="2">Lead Generated</option>
-                    <option value="3">Contract Executed</option>
-                    <option value="4">Deal Closed</option>
-                </select>
-            </div>
-            <div class="mb-1">
-                <label for="contact-group" class="form-label">Contact Group</label>
-                <select class="form-select" id="contact-group" name="contact_group">
-                    <option selected>Select Group</option>
-                    ${response.groups.map(group => `
-                                                                                    <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
-                    ).join('')}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>`;
+    <form id="update-contact-form">
+        <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
+        <div class="mb-1">
+            <label for="first-name" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="first-name" name="first_name" value="${response.first_name}">
+        </div>
+        <div class="mb-1">
+            <label for="last-name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last-name" name="last_name" value="${response.last_name}">
+        </div>
+        <div class="mb-1">
+            <label for="user-org" class="form-label">User & Org</label>
+            <select class="form-select" id="user-org" name="user_org">
+                <option selected>Select org</option>
+                ${response.user_and_orgs.map(user_org => `
+                                                                                        <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                ).join('')}
+            </select>
+        </div>
+        <div class="mb-1">
+            <label for="leadStatus" class="form-label">Lead Status</label>
+            <select class="form-select" id="leadStatus" name="lead_status">
+                <option selected>Select Status</option>
+                <option value="1">Offer Made</option>
+                <option value="2">Lead Generated</option>
+                <option value="3">Contract Executed</option>
+                <option value="4">Deal Closed</option>
+            </select>
+        </div>
+        <div class="mb-1">
+            <label for="contact-group" class="form-label">Contact Group</label>
+            <select class="form-select" id="contact-group" name="contact_group">
+                <option selected>Select Group</option>
+                ${response.groups.map(group => `
+                                                                                        <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
+                ).join('')}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>`;
 
                     // Make Contact Group read-only if group_id is not null
                     if (response.group_id !== null) {
@@ -647,7 +751,7 @@
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
                         $.ajax({
-                            url: '{{ url('/chat-box/update-contact') }}', // Replace with your Laravel endpoint
+                            url: '{{ url(' / chat - box / update - contact ') }}', // Replace with your Laravel endpoint
                             type: 'POST',
                             data: formData,
                             headers: {
@@ -690,22 +794,22 @@
 
                     // Populate the form with response data
                     document.getElementById('add-note').innerHTML = `
-        <form id='add-note-form'>
-            <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
-            <div class="mb-1">
-                <label for="addNote" class="form-label">Add Note</label>
-                <textarea class="form-control" id="addNote" name="addNote" rows="7">${response.note ? response.note : ''}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    `;
+    <form id='add-note-form'>
+        <input type="text" readonly class="d-none" id="chat_id" name="chat_id" value="${chat_id}">
+        <div class="mb-1">
+            <label for="addNote" class="form-label">Add Note</label>
+            <textarea class="form-control" id="addNote" name="addNote" rows="7">${response.note ? response.note : ''}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+`;
 
                     // Add event listener for form submission
                     $('#add-note-form').on('submit', function(e) {
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
                         $.ajax({
-                            url: '{{ url('/chat-box/add-note') }}', // Replace with your Laravel endpoint
+                            url: '{{ url(' / chat - box / add - note ') }}', // Replace with your Laravel endpoint
                             type: 'POST',
                             data: formData,
                             headers: {
@@ -741,24 +845,24 @@
 
         });
 
-
-
+        // *************************************************
         function isImageOrVideo(url) {
-            const ext = url.substr(url.lastIndexOf('.') + 1);
-            const imageExts = ['jpg', 'jpeg', 'gif', 'png'];
-            const videoExts = ['mp4', 'avi', 'mov', 'wmv'];
-            const audioExts = ['ogg', 'mp3'];
+            const videoExtensions = ['mp4', 'avi', 'mkv', 'webm'];
+            const audioExtensions = ['mp3', 'wav', 'ogg'];
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
-            if (imageExts.indexOf(ext.toLowerCase()) !== -1) {
-                return 'image';
-            } else if (videoExts.indexOf(ext.toLowerCase()) !== -1) {
+            const extension = url.split('.').pop().toLowerCase();
+
+            if (videoExtensions.includes(extension)) {
                 return 'video';
-            } else if (audioExts.indexOf(ext.toLowerCase()) !== -1) {
+            } else if (audioExtensions.includes(extension)) {
                 return 'audio';
-            } else {
-                return false;
+            } else if (imageExtensions.includes(extension)) {
+                return 'image';
             }
+            return 'unknown';
         }
+
 
         // Add message to chat
         function enter_chat() {
@@ -840,6 +944,8 @@
                 }
             });
         }
+
+
         $(".remove-btn").on('click', function(event) {
             event.preventDefault();
             let sms_id = $(".chat_id").val();
@@ -864,6 +970,7 @@
                             _token: "{{ csrf_token() }}"
                         },
                         success: function(response) {
+
                             if (response.status === 'success') {
                                 toastr['success'](response.message,
                                     '{{ __('locale.labels.success') }}!!', {
@@ -1000,6 +1107,86 @@
             })
 
         })
+
+        $(".add-to-pin").on('click', function(event) {
+            event.preventDefault();
+            let sms_id = $(".chat_id").val();
+
+            Swal.fire({
+                title: "{{ __('locale.labels.are_you_sure') }}",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: "{{ __('locale.labels.yes') }}",
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-outline-danger ms-1'
+                },
+                buttonsStyling: false,
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        url: "{{ url('/chat-box') }}" + '/' + sms_id + '/pin',
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+
+                            if (response.status === 'success') {
+                                toastr['success'](response.message,
+                                    '{{ __('locale.labels.success') }}!!', {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+
+                                setTimeout(function() {
+                                    window.location
+                                        .reload(); // then reload the page.(3)
+                                }, 1000);
+
+                            } else {
+                                toastr['warning'](response.message,
+                                    '{{ __('locale.labels.warning') }}!', {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                            }
+                        },
+                        error: function(reject) {
+                            if (reject.status === 422) {
+                                let errors = reject.responseJSON.errors;
+                                $.each(errors, function(key, value) {
+                                    toastr['warning'](value[0],
+                                        "{{ __('locale.labels.attention') }}", {
+                                            closeButton: true,
+                                            positionClass: 'toast-top-right',
+                                            progressBar: true,
+                                            newestOnTop: true,
+                                            rtl: isRtl
+                                        });
+                                });
+                            } else {
+                                toastr['warning'](reject.responseJSON.message,
+                                    "{{ __('locale.labels.attention') }}", {
+                                        closeButton: true,
+                                        positionClass: 'toast-top-right',
+                                        progressBar: true,
+                                        newestOnTop: true,
+                                        rtl: isRtl
+                                    });
+                            }
+                        }
+                    });
+                }
+            })
+
+        })
         $(".view-chat-contact").on('click', function(event) {
             event.preventDefault();
             let sms_id = $(".chat_id").val();
@@ -1075,9 +1262,6 @@
                 }
             });
         });
-
-
-
         @if (config('broadcasting.connections.pusher.app_id'))
             let activeChatID = $('.chat-users-list li.active').attr('data-id');
 
@@ -1180,5 +1364,124 @@
                 });
             });
         @endif
+
+
+        $(document).ready(function() {
+            let page = 1;
+            let search = ''; // Default search value
+
+            // Map activeTab values to filter values
+            const tabToFilterMap = {
+                'unread-tab': 'unread',
+                'read-tab': 'read',
+                'starred-tab': 'starred',
+                'followup-tab': 'follow-up',
+                'undercontract-tab': 'under-contract',
+                'freshlead-tab': 'fresh-lead'
+            };
+
+            // Determine the initial filter based on localStorage or default to 'unread'
+            const activeTab = localStorage.getItem('activeTab');
+            let filter = tabToFilterMap[activeTab] || 'unread';
+
+            // Function to set the active tab and save it to localStorage
+            function setActiveTab(tabId) {
+                // Remove the 'btn-primary' class from all tab buttons
+                $('.tab-button').removeClass('btn-primary').addClass('btn-outline-primary');
+
+                // Add the 'btn-primary' class to the active tab button
+                $(`#${tabId}`).removeClass('btn-outline-primary').addClass('btn-primary');
+
+                // Save the active tab to localStorage
+                localStorage.setItem('activeTab', tabId);
+            }
+
+            // Function to load chat users
+            function loadChatUsers(page, filter, search, append = false) {
+                $.ajax({
+                    url: "{{ url('/chat-box/load') }}" + `?page=${page}&filter=${filter}&search=${search}`,
+                    type: 'GET',
+                    beforeSend: function() {
+                        $('#loader').show(); // Show the loader before the request
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        $('#loader').hide(); // Hide the loader after data is loaded
+                        if (append) {
+                            $('.chat-users-list').append(response); // Append new data
+                        } else {
+                            $('.chat-users-list').html(response); // Replace data
+                        }
+
+                        feather.replace();
+                    },
+                    error: function() {
+                        $('#loader').hide(); // Hide loader in case of error
+                        toastr['warning']('{{ __('locale.exceptions.something_went_wrong') }}',
+                            "{{ __('locale.labels.attention') }}", {
+                                closeButton: true,
+                                positionClass: 'toast-top-right',
+                                progressBar: true,
+                                newestOnTop: true,
+                                rtl: isRtl
+                            });
+                    }
+                });
+            }
+
+            // Initial load
+            const initialTabId = activeTab ||
+            'unread-tab'; // Use activeTab from localStorage or default to 'unread-tab'
+            setActiveTab(initialTabId); // Set the active tab based on localStorage or default
+            loadChatUsers(page, filter, search);
+
+            // Add debounce function to delay the search request
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // Filter data by tab
+            $('.tab-button').on('click', function() {
+                // Get the tab ID and corresponding filter value
+                const tabId = $(this).attr('id');
+                filter = tabToFilterMap[tabId];
+
+                // Reset page to 1
+                page = 1;
+
+                // Set the active tab and save it to localStorage
+                setActiveTab(tabId);
+
+                // Load data for the selected filter
+                loadChatUsers(page, filter, search);
+            });
+
+            // Load more data when "Load More" button is clicked
+            $('#load-more').on('click', function() {
+                page += 1; // Increment page number
+                loadChatUsers(page, filter, search, true); // Append new data
+            });
+
+            // Search functionality with debounce
+            $('#chat-search').on('keyup', debounce(function() {
+                search = $(this).val(); // Get search value
+                page = 1; // Reset page to 1
+                loadChatUsers(page, filter, search);
+            }, 500)); // Delay of 500ms
+        });
+
+
+        $('#users-list').on('scroll', function(e) {
+            e.preventDefault();
+            let div = $(this).get(0);
+            if (div.scrollTop + div.clientHeight >= div.scrollHeight) {
+                // do the lazy loading here
+                $('#load-more').trigger('click');
+            }
+        });
     </script>
 @endsection
