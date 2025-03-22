@@ -222,7 +222,7 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
-                        toastr['success'](response.message, 'Success!!', {
+                        toastr['success'](data.message, 'Success!!', {
                             closeButton: true,
                             positionClass: 'toast-top-right',
                             progressBar: true,
@@ -249,7 +249,7 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
-                        toastr['success'](response.message, 'Success!!', {
+                        toastr['success'](data.message, 'Success!!', {
                             closeButton: true,
                             positionClass: 'toast-top-right',
                             progressBar: true,
@@ -276,7 +276,7 @@
                 .then(data => {
                     if (data.status == 'success') {
                         console.log(data);
-                        toastr['success'](response.message, 'Success!!', {
+                        toastr['success'](data.message, 'Success!!', {
                             closeButton: true,
                             positionClass: 'toast-top-right',
                             progressBar: true,
