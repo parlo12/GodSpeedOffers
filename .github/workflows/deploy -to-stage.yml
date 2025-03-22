@@ -19,9 +19,6 @@ jobs:
           script: |
             set -e # Exit immediately on error
             cd /home/support/web/crmstaging.godspeedoffers.com/public_html
-            git stash
-            git pull
-            git stash pop
             git reset --hard origin/master
             php artisan config:cache
             php artisan route:cache
