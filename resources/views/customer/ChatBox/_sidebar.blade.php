@@ -229,8 +229,10 @@
                             newestOnTop: true,
                             rtl: isRtl
                         });
-                        location.reload()
-                        // Toggle the star icon
+                        setTimeout(() => {
+                            location.reload()
+
+                        }, 2000);
                     } else {
                         console.error('Error removing follow_up:', data.message);
                     }
@@ -256,9 +258,10 @@
                             newestOnTop: true,
                             rtl: isRtl
                         });
-                        location.reload()
-                        // Toggle the star icon
-                    } else {
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);                       
+                                        } else {
                         console.error('Error removing fresh lead:', data.message);
                     }
                 }).catch(error => console.error('Error:', error));
@@ -283,7 +286,10 @@
                             newestOnTop: true,
                             rtl: isRtl
                         });
-                        location.reload()
+                        setTimeout(() => {
+                            location.reload()
+
+                        }, 2000);
                         // Toggle the star icon
                     } else {
                         console.error('Error removing under contract:', data.message);
