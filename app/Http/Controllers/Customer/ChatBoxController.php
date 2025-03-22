@@ -417,16 +417,16 @@ class ChatBoxController extends Controller
                 $query->where('is_starred', true);
                 break;
             case 'fresh-lead':
-                $query->where('fresh_lead', true)
-                    ->where('is_starred', false);
+                $query->where('fresh_lead', true);
+                    // ->where('is_starred', false);
                 break;
             case 'under-contract':
-                $query->where('under_contract', true)
-                    ->where('is_starred', false);
+                $query->where('under_contract', true);
+                    // ->where('is_starred', false);
                 break;
             case 'follow-up':
-                $query->where('follow_up', true)
-                    ->where('is_starred', false);
+                $query->where('follow_up', true);
+                    // ->where('is_starred', false);
                 break;
         }
     
