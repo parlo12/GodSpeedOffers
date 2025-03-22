@@ -2,7 +2,7 @@ name: Remote Deployment
 on:
   push:
     branches:
-      - master # Only trigger on master branch push
+      - master # Only trigger on master branch pushes
 
 jobs:
   deploy:
