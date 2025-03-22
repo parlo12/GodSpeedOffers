@@ -17,18 +17,29 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
-            set -e # Exit immediately on error
+            set -e # Exit immediately on error if any command fails
+            
+            # Navigate to project directory
             cd /home/support/web/godspeedoffers.com/public_html
-            git pull
-            git reset --hard origin/master
+
+            # Stash local changes to prevent merge conflicts
+            git stash --include-untracked
+
+            # Fetch the latest changes
+            git fetch --all
+
+            # Reset local branch to match remote main branch
+            git reset --hard origin/main
+
+            # Apply any stashed changes (optional, remove if not needed)
+            git stash pop || echo "No stashed changes to apply"
+
+            # Clear Laravel caches
+            php artisan config:clear
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            sudo chown -R www-data:www-data /home/support/web/godspeedoffers.com/public_html/storage
-            sudo chown -R www-data:www-data /home/support/web/godspeedoffers.com/public_html/bootstrap/cache
-            sudo chmod -R 775 /home/support/web/godspeedoffers.com/public_html/storage
-            sudo chmod -R 775 /home/support/web/godspeedoffers.com/public_html/bootstrap/cache
-            sudo chown -R www-data:www-data /home/support/web/godspeedoffers.com/public_html/storage
-            sudo chown -R www-data:www-data /home/support/web/godspeedoffers.com/public_html/public
-            sudo chmod -R 775 /home/support/web/godspeedoffers.com/public_html/public
 
+            # Set proper file permissions
+            sudo chown -R www-data:www-data storage bootstrap/cache public
+            sudo chmod -R 775 storage bootstrap/cache public
