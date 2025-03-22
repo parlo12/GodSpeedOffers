@@ -81,6 +81,10 @@ class WebsocketAPIListener extends Command
                     $receiver = trim($decodedMessage['phone']);
                 }
                 
+                // Normalize the receiver by removing any leading '+'.
+                if ($receiver) {
+                    $receiver = ltrim($receiver, '+');
+                }
                 
                 $targetServerId = null;
                 if ($receiver) {
@@ -97,7 +101,6 @@ class WebsocketAPIListener extends Command
                 if (!$targetServerId) {
                     $targetDeviceId = trim($decodedMessage['device_id'] ?? '');
                     if ($targetDeviceId) {
-                        $deviceIdRecord = PhoneNumbers::where('device_id', $device_id)->first();
                         foreach ($clients as $entry) {
                             if ($entry['server']->device_id === $targetDeviceId) {
                                 $targetServerId = $entry['server']->id;
@@ -119,7 +122,7 @@ class WebsocketAPIListener extends Command
                             try {
                                 $entry['client']->emit('outgoingSMS', [
                                     'deviceId' => $decodedMessage['device_id'] ?? '',
-                                    'receiver' => $decodedMessage['phone'] ?? '',
+                                    'receiver' => $receiver ?? '',
                                     'content'  => $decodedMessage['message'] ?? '',
                                 ]);
                             } catch (\Exception $e) {
