@@ -398,36 +398,29 @@ class ChatBoxController extends Controller
         // Start the base query with user conditions
         $query = ChatBox::where(function ($q) {
             $q->where('user_id', Auth::id())
-                ->orWhere('pipeline_user', Auth::id())
-                ->where('reply_by_customer', true)
-                ;
-        });
+              ->orWhere('pipeline_user', Auth::id());
+        })->where('reply_by_customer', true);
     
         // Apply the filter using switch
         switch ($filter) {
             case 'unread':
                 $query->where('notification', '>', 0);
-                     //->where('is_starred', false);
                 break;
             case 'read':
                 $query->where('notification', '=', 0)
-                    ->where('is_starred', false);
-                   
+                      ->where('is_starred', false);
                 break;
             case 'starred':
                 $query->where('is_starred', true);
                 break;
             case 'fresh-lead':
                 $query->where('fresh_lead', true);
-                    // ->where('is_starred', false);
                 break;
             case 'under-contract':
                 $query->where('under_contract', true);
-                    // ->where('is_starred', false);
                 break;
             case 'follow-up':
                 $query->where('follow_up', true);
-                    // ->where('is_starred', false);
                 break;
         }
     
@@ -435,7 +428,7 @@ class ChatBoxController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('from', 'LIKE', "%{$search}%")
-                    ->orWhere('to', 'LIKE', "%{$search}%");
+                  ->orWhere('to', 'LIKE', "%{$search}%");
             });
         }
     
@@ -450,6 +443,7 @@ class ChatBoxController extends Controller
     
         return view('customer.ChatBox.partials._chat_list', compact('chat_box'))->render();
     }
+    
     
 
 
