@@ -413,7 +413,6 @@ class ChatBoxController extends Controller
                 break;
             case 'read':
                 $query->where('notification', '=', 0);
-                // ->where('is_starred', false);
                 break;
             case 'starred':
                 $query->where('is_starred', true);
