@@ -407,7 +407,6 @@ class ChatBoxController extends Controller
                 ->orWhere('pipeline_user', Auth::id());
         })->where('reply_by_customer', true);
 
-        // Apply the filter using switch
         switch ($filter) {
             case 'unread':
                 $query->where('notification', '>', 0);
