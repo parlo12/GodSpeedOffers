@@ -1,11 +1,16 @@
+<style>
+    #users-list{
+        overflow-y: auto;
+}
+</style>
 <div class="sidebar-content">
 
     <span class="sidebar-close-icon">
         <i data-feather="x"></i>
     </span>
 
-    <div class="text-center pt-1 pb-1">
-        <div role="group" class="tab-group btn-group mb-2">
+    <div class="text-center ">
+        <div role="group" class="tab-group btn-group">
             <button onclick="reloadPage()" id="unread-tab"type="button" class="btn tab-button btn-primary btn-sm"
                 data-filter="unread">Unread
                 <span id="unread_count"
@@ -17,7 +22,7 @@
             <button onclick="reloadStarred()" id="starred-tab" type="button"
                 class="btn tab-button btn-outline-primary btn-sm" data-filter="starred">starred</button>
         </div>
-        <div role="group" class="tab-group btn-group mb-2">
+        <div role="group" class="tab-group btn-group ">
             <button onclick="reloadFollowup()" id="followup-tab"type="button"
                 class="btn tab-button btn-outline-primary btn-sm" data-filter="follow-up">Follow Up</button>
             <button onclick="reloadUndercontract()" id="undercontract-tab" type="button"
@@ -100,7 +105,7 @@
 
         @endif --}}
 
-        <ul class="chat-users-list chat-list media-list">
+        <ul class="chat-users-list chat-list media-list pb-4 ">
             <!-- Chat users will be loaded here via Ajax -->
         </ul>
     </div>
@@ -296,5 +301,6 @@
                     }
                 }).catch(error => console.error('Error:', error));
         }
+
     </script>
 </div>

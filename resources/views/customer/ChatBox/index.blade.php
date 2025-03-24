@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/extensions/sweetalert2.min.css')) }}">
 
     <style>
+        
         /* For screens smaller than 576px */
         @media (max-width: 576px) {
 
@@ -1475,13 +1476,12 @@
         });
 
 
-        $('#users-list').on('scroll', function(e) {
-            e.preventDefault();
-            let div = $(this).get(0);
-            if (div.scrollTop + div.clientHeight >= div.scrollHeight) {
-                // do the lazy loading here
-                $('#load-more').trigger('click');
-            }
-        });
+        $('#users-list').on('scroll', function () {
+    let div = $(this).get(0);
+    if (div.scrollTop + div.clientHeight >= div.scrollHeight - 5) {
+        $('#load-more').trigger('click');
+    }
+});
+
     </script>
 @endsection
