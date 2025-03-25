@@ -805,7 +805,7 @@
     </form>
 `;
 
-                    // Add event listener for form submission
+                    
                     $('#add-note-form').on('submit', function(e) {
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
