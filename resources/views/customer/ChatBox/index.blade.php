@@ -160,9 +160,7 @@
 
                             </div>
 
-                            <!-- Add Note Tab -->
                             <div class="tab-pane fade" id="add-note" role="tabpanel" aria-labelledby="add-note-tab">
-                                here
                             </div>
                             {{-- Follow up --}}
                             <div class="tab-pane fade show " id="follow-up" role="tabpanel" aria-labelledby="follow-up-tab">
