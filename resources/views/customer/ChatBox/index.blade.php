@@ -91,9 +91,7 @@
 
 @section('content')
     <div class="body-content-overlay"></div>
-    <!-- Main chat area -->
     <section class="chat-app-window">
-        <!-- To load Conversation -->
         <div class="start-chat-area">
             <div class="mb-1 start-chat-icon">
                 <i data-feather="message-square"></i>
@@ -105,11 +103,8 @@
                 <a href="{{ route('customer.chatbox.new') }}" class="text-dark">{{ __('locale.labels.new_conversion') }}</a>
             </h4>
         </div>
-        <!--/ To load Conversation -->
 
-        <!-- Active Chat -->
         <div class="active-chat d-none">
-            <!-- Chat Header -->
             <div class="chat-navbar">
                 <header class="chat-header">
                     <div class="d-flex align-items-center">
