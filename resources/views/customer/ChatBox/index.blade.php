@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/extensions/sweetalert2.min.css')) }}">
 
     <style>
-        
         /* For screens smaller than 576px */
         @media (max-width: 576px) {
 
@@ -66,6 +65,20 @@
                 max-width: 100%;
                 height: auto;
             }
+        }
+
+        .preserve-whitespace {
+            white-space: pre-wrap;
+        }
+
+        .chat-content {
+            word-break: break-word;
+            /* Ensures long words break and don't overflow */
+        }
+
+        .chat-time {
+            word-break: break-word;
+            /* Apply wrapping for the timestamp */
         }
     </style>
 
@@ -625,14 +638,14 @@
             <select required class="form-select" id="user-id" name="user_id">
                 <option selected>Assign To</option>
                 ${response.user_and_orgs.map(user_org => `
-                              <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                                  <option value="${user_org.user_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                 ).join('')}
             </select>
             <label for=crm_user" class="form-label">CRM User</label>
             <select required class="form-select" id="crm-user" name="crm_user">
                 <option selected>Select CRM user</option>
                 ${response.crm_users.map(crm_user => `
-                              <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
+                                  <option value="${crm_user.id}">${crm_user.first_name} - ${crm_user.last_name}</option>`
                 ).join('')}
             </select>
             <label for="pipeline" class="form-label">Pipeline</label>
@@ -714,7 +727,7 @@
             <select class="form-select" id="user-org" name="user_org">
                 <option selected>Select org</option>
                 ${response.user_and_orgs.map(user_org => `
-                                                                                        <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
+                                                                                            <option value="${user_org.organisation_id}">${user_org.user_name} - ${user_org.organisation_name}</option>`
                 ).join('')}
             </select>
         </div>
@@ -733,7 +746,7 @@
             <select class="form-select" id="contact-group" name="contact_group">
                 <option selected>Select Group</option>
                 ${response.groups.map(group => `
-                                                                                        <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
+                                                                                            <option value="${group.id}" ${group.id == response.group_id ? 'selected' : ''}>${group.name}</option>`
                 ).join('')}
             </select>
         </div>
@@ -750,7 +763,7 @@
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
                         $.ajax({
-                            url: '{{url('/chat-box/update-contact')}}', // Replace with your Laravel endpoint
+                            url: '{{ url('/chat-box/update-contact') }}', // Replace with your Laravel endpoint
                             type: 'POST',
                             data: formData,
                             headers: {
@@ -803,12 +816,12 @@
     </form>
 `;
 
-                    
+
                     $('#add-note-form').on('submit', function(e) {
                         e.preventDefault(); // Prevent default form submission
                         const formData = $(this).serialize(); // Serialize the form data
                         $.ajax({
-                            url: '{{url('/chat-box/add-note')}}', // Replace with your Laravel endpoint
+                            url: '{{ url('/chat-box/add-note') }}', // Replace with your Laravel endpoint
                             type: 'POST',
                             data: formData,
                             headers: {
@@ -1430,7 +1443,7 @@
 
             // Initial load
             const initialTabId = activeTab ||
-            'unread-tab'; // Use activeTab from localStorage or default to 'unread-tab'
+                'unread-tab'; // Use activeTab from localStorage or default to 'unread-tab'
             setActiveTab(initialTabId); // Set the active tab based on localStorage or default
             loadChatUsers(page, filter, search);
 
@@ -1474,12 +1487,11 @@
         });
 
 
-        $('#users-list').on('scroll', function () {
-    let div = $(this).get(0);
-    if (div.scrollTop + div.clientHeight >= div.scrollHeight - 5) {
-        $('#load-more').trigger('click');
-    }
-});
-
+        $('#users-list').on('scroll', function() {
+            let div = $(this).get(0);
+            if (div.scrollTop + div.clientHeight >= div.scrollHeight - 5) {
+                $('#load-more').trigger('click');
+            }
+        });
     </script>
 @endsection
