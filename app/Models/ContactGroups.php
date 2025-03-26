@@ -454,6 +454,14 @@
                 'required'         => false,
                 'visible'          => true,
             ]);
+            $this->contactGroupFields()->create([
+                'contact_group_id' => $this->id,
+                'type'             => 'text',
+                'label'            => 'GENERATED_MESSAGE',
+                'tag'              => 'GENERATED_MESSAGE',
+                'required'         => false,
+                'visible'          => true,
+            ]);
         }
         
         public function createUpdateFields()
