@@ -104,7 +104,7 @@ class WebsocketAPIListener extends Command
             // Process incoming messages.
             foreach ($clients as $entry) {
                 try {
-                    if ($packet = $entry['client']->wait(null, 1)) {
+                    if ($packet = $entry['client']->wait(null, 0)) {
                         // Pass all incoming packets to the Handler.
                         new Handler($packet->event, $packet->data);
                     }
@@ -113,7 +113,7 @@ class WebsocketAPIListener extends Command
                 }
             }
 
-            usleep(50000); // Sleep 50ms to prevent CPU overuse.
+            usleep(10000); // Sleep 50ms to prevent CPU overuse.
         }
 
         return Command::SUCCESS;
