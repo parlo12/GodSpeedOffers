@@ -104,12 +104,19 @@ class WebsocketAPIListener extends Command
             // Process incoming messages.
             foreach ($clients as $entry) {
                 try {
-                    if ($packet = $entry['client']->wait(null, 0)) {
+                    if ($packet = $entry['client']->wait(null, 0.1)) {
                         // Pass all incoming packets to the Handler.
                         new Handler($packet->event, $packet->data);
                     }
                 } catch (\Exception $e) {
-                    Log::error("Error processing incoming packet on server ID " . $entry['server']->id . ": " . $e->getMessage());
+                     // Optionally, check if the error message indicates a timeout and handle it gracefully.
+                    if (strpos($e->getMessage(), 'Operation timed out') !== false) {
+                        Log::warning("Timeout while waiting for packet on server ID " . $entry['server']->id);
+                    } else {
+                        // Log any other exceptions that may occur while waiting for packets.
+                        Log::error("Error processing incoming packet on server ID " . $entry['server']->id . ": " . $e->getMessage());
+                        // Optionally, you can choose to reconnect the client or take other actions.
+                    }
                 }
             }
 
