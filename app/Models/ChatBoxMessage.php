@@ -15,6 +15,7 @@ class ChatBoxMessage extends Model
         'message',
         'media_url',
         'sms_type',
+        'media_type',
         'send_by',
         'sending_server_id',
         'recovered'
