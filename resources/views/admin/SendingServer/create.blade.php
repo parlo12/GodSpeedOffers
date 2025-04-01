@@ -371,7 +371,7 @@
                                                         Token</label>
                                                     <input type="text" id="auth_token"
                                                            class="form-control @error('auth_token') is-invalid @enderror"
-                                                           value="{{ $server['auth_token'] }}" name="auth_token"
+                                                           value="{{ $server['auth_token'] ?? ''}}" name="auth_token"
                                                            required>
                                                     @error('auth_token')
                                                     <div class="invalid-feedback">
@@ -530,7 +530,7 @@
                                                         Token</label>
                                                     <input type="text" id="auth_token"
                                                            class="form-control @error('auth_token') is-invalid @enderror"
-                                                           value="{{ $server['auth_token'] }}" name="auth_token"
+                                                           value="{{ $server['auth_token'] ?? ''  }}" name="auth_token"
                                                            required>
                                                     @error('auth_token')
                                                     <div class="invalid-feedback">
@@ -1154,7 +1154,7 @@
                                                         Token</label>
                                                     <input type="text" id="auth_token"
                                                            class="form-control @error('auth_token') is-invalid @enderror"
-                                                           value="{{ $server['auth_token'] }}" name="auth_token"
+                                                           value="{{ $server['auth_token'] ?? ''  }}" name="auth_token"
                                                            required>
                                                     @error('auth_token')
                                                     <div class="invalid-feedback">
