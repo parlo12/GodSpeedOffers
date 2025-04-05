@@ -29,12 +29,13 @@ class HandleSmsEventJob implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info($this->data);
         // Extract values using array keys.
-        $deviceId  = $data['deviceId']  ?? null;
-        $messageId = $data['messageId'] ?? '';
-        $sender    = $data['sender']    ?? '';
-        $receiver  = $data['receiver']  ?? '';
-        $content   = $data['content']   ?? '';
+        $deviceId  = $this->data['deviceId']  ?? null;
+        $messageId = $this->data['messageId'] ?? '';
+        $sender    = $this->data['sender']    ?? '';
+        $receiver  = $this->data['receiver']  ?? '';
+        $content   = $this->data['content']   ?? '';
 
         Log::info("Handling SMS Event: deviceId={$deviceId}, messageId={$messageId}, sender={$sender}, receiver={$receiver}");
 
