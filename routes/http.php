@@ -67,5 +67,4 @@ Route::get('sms/{uid}', 'CampaignHTTPController@viewSMS')->name('sms.view');
 |
 |
 */
-
 Route::post('callback/sms', 'CallBackController@receiveSmsCallback')->name('callback.sms');
