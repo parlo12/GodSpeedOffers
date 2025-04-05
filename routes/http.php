@@ -58,3 +58,14 @@ Route::post('contacts/{group_id}/show', 'ContactsHTTPController@show')->name('co
 Route::get('sms', 'CampaignHTTPController@viewAllSMS')->name('sms.index');
 Route::any('sms/send', 'CampaignHTTPController@smsSend')->name('sms.send');
 Route::get('sms/{uid}', 'CampaignHTTPController@viewSMS')->name('sms.view');
+
+/*
+|-------------------------------------------------------------------------
+| Callbacks
+|-------------------------------------------------------------------------
+|
+|
+|
+*/
+
+Route::post('callback/sms', 'CallBackController@receiveSmsCallback')->name('callback.sms');
