@@ -75,3 +75,14 @@ use App\Http\Controllers\VoiceController;
     */
 
     Route::get('campaign/{uid}/view', 'CampaignController@viewCampaign')->name('campaign.view');
+
+    /*
+    |-------------------------------------------------------------------------
+    | Callbacks
+    |-------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    Route::post('callback/sms', 'CallBackController@receiveSmsCallback')->name('callback.sms');
