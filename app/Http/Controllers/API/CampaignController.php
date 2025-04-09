@@ -518,8 +518,8 @@ class CampaignController extends Controller
         }
 
         $box = ChatBox::where('to', $phone)
-        ->where('from', $sending_number)
-        ->first();
+            ->where('from', $sending_number)
+            ->first();
         if (config('app.stage') === 'demo') {
             return response()->json([
                 'status'  => 'error',
@@ -634,49 +634,49 @@ class CampaignController extends Controller
                 'message' => $exception->getMessage(),
             ]);
         }
-    } 
+    }
     public function get_wake_time(R $request)
     {
         $this->authorize('chat_box');
         Log::info("here");
         // Validate the incoming request
-      
-    
+
+
         try {
             // Extract parameters
             $phone = $request->input('phone');
             $sending_number = $request->input('sending_number');
-    
+
             Log::info("Fetching chatbox record", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
             ]);
-    
+
             // Find the chatbox record
             $chatbox = Chatbox::where('to', $phone)
                 ->where('from', $sending_number)
                 ->first();
-    
+
             // Check if a record was found
             if (!$chatbox) {
                 Log::warning("No chatbox record found", [
                     'phone' => $phone,
                     'sending_number' => $sending_number,
                 ]);
-    
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No chatbox record found for the given parameters',
                 ], 404);
             }
-    
+
             // Log the wake time
             Log::info("Chatbox record found", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
                 'wake_time' => $chatbox->wake_time,
             ]);
-    
+
             // Return the wake_time from the chatbox
             return response()->json([
                 'status' => 'success',
@@ -689,7 +689,7 @@ class CampaignController extends Controller
                 'phone' => $request->input('phone'),
                 'sending_number' => $request->input('sending_number'),
             ]);
-    
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing your request',
@@ -702,43 +702,43 @@ class CampaignController extends Controller
         $this->authorize('chat_box');
         Log::info("starring here");
         // Validate the incoming request
-      
-    
+
+
         try {
             // Extract parameters
             $phone = $request->input('phone');
             $sending_number = $request->input('sending_number');
-    
+
             Log::info("Fetching chatbox record", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
             ]);
-    
+
             // Find the chatbox record
             $chatbox = Chatbox::where('to', $phone)
                 ->where('from', $sending_number)
                 ->first();
-    
+
             // Check if a record was found
             if (!$chatbox) {
                 Log::warning("No chatbox record found", [
                     'phone' => $phone,
                     'sending_number' => $sending_number,
                 ]);
-    
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No chatbox record found for the given parameters',
                 ], 404);
             }
-    
+
             // Log the wake time
             Log::info("Chatbox record found", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
                 'wake_time' => $chatbox->wake_time,
             ]);
-            $chatbox->is_starred=1;
+            $chatbox->is_starred = 1;
             $chatbox->save();
             // Return the wake_time from the chatbox
             return response()->json([
@@ -752,7 +752,7 @@ class CampaignController extends Controller
                 'phone' => $request->input('phone'),
                 'sending_number' => $request->input('sending_number'),
             ]);
-    
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing your request',
@@ -760,5 +760,166 @@ class CampaignController extends Controller
             ], 500);
         }
     }
-    
+    public function ai_call_summary(Campaigns $campaign, R $request): JsonResponse
+    {
+        $phone = $request->input('phone'); // Extracting the phone from the request
+        Log::info("phone is $phone");
+        $sending_number = $request->input('sending_number');
+        Log::info("Sending number is $sending_number");
+
+        if (!$phone) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => __('locale.customer.invalid_phone_number'),
+                'request' => $request
+            ]);
+        }
+
+        // Check for existing chatbox in both directions
+        $box = ChatBox::where(function ($query) use ($phone, $sending_number) {
+            $query->where('to', $phone)->where('from', $sending_number);
+        })->orWhere(function ($query) use ($phone, $sending_number) {
+            $query->where('to', $sending_number)->where('from', $phone);
+        })->first();
+
+        if (config('app.stage') === 'demo') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Sorry! This option is not available in demo mode',
+            ]);
+        }
+
+        $this->authorize('chat_box');
+
+        if (empty($request->message)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => __('locale.campaigns.insert_your_message'),
+            ]);
+        }
+
+        $user = Auth::user();
+        $number = PhoneNumbers::where('user_id', $user->id)
+                ->where('number', $request->input('sending_number'))
+                ->where('status', 'assigned')
+                ->first();
+        $sending_server = SendingServer::find($number->sending_server_id);
+        if (!$sending_server) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => __('locale.campaigns.sending_server_not_available'),
+            ]);
+        }
+        // If no existing chatbox found, create a new one
+        if (!$box) {
+            $box = ChatBox::create([
+                'to' => $phone,
+                'from' => $sending_number,
+                'message' => $request->message,
+                'note' => $request->note ?? null,
+                'user_id' => $user->id,
+                'sending_server_id' => $request->sending_server_id ?? null, // Make sure to pass this in request
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            // Update existing chatbox with new message and note
+            $box->update([
+                'message' => $request->message,
+                'note' => $request->note ?? $box->note, // Keep existing note if new one not provided
+                'updated_at' => now(),
+            ]);
+        }
+
+        
+
+        $sender_id = $sending_number;
+
+        $media_url = $request->hasFile('file')
+            ? Tool::uploadImage($request->file('file'))
+            : null;
+
+        $sms_type = $media_url
+            ? 'mms'
+            : ($sending_server->settings === 'Whatsender' || $sending_server->type === 'whatsapp' ? 'whatsapp' : 'plain');
+
+        $capabilities_type = $sms_type === 'mms' ? 'mms' : 'sms';
+
+        $input = [
+            'sender_id'      => $sender_id,
+            'originator'     => 'phone_number',
+            'sending_server' => $sending_server->id,
+            'sms_type'       => $sms_type,
+            'message'        => $request->message,
+            'exist_c_code'   => 'yes',
+            'user'           => $user,
+            'media_url'      => $media_url,
+        ];
+
+        if ($user->customer->getOption('sender_id_verification') === 'yes') {
+            $number = PhoneNumbers::where('user_id', $user->id)
+                ->where('number', $sender_id)
+                ->where('status', 'assigned')
+                ->first();
+
+            if (!$number) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => __('locale.sender_id.sender_id_invalid', ['sender_id' => $sender_id]),
+                ]);
+            }
+
+            if (!str_contains($number->capabilities, $capabilities_type)) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => __('locale.sender_id.sender_id_sms_capabilities', ['sender_id' => $sender_id, 'type' => $sms_type]),
+                ]);
+            }
+
+            $input['originator']   = 'phone_number';
+            $input['phone_number'] = $sender_id;
+        }
+
+        try {
+            $phoneUtil = PhoneNumberUtil::getInstance();
+            $phoneNumberObject = $phoneUtil->parse('+' . $box->to);
+
+            if ($phoneUtil->isPossibleNumber($phoneNumberObject)) {
+                $input['country_code'] = $phoneNumberObject->getCountryCode();
+                $input['recipient'] = $phoneNumberObject->getNationalNumber();
+                $input['region_code'] = $phoneUtil->getRegionCodeForNumber($phoneNumberObject);
+
+                $data = $this->campaigns->quickSend($campaign, $input);
+
+                if (isset($data->getData()->status)) {
+                    if ($data->getData()->status === 'success') {
+                        return response()->json([
+                            'status'  => 'success',
+                            'message' => __('locale.campaigns.message_successfully_delivered'),
+                        ]);
+                    }
+
+                    return response()->json([
+                        'status'  => $data->getData()->status,
+                        'message' => $data->getData()->message,
+                    ]);
+                }
+
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => __('locale.exceptions.something_went_wrong'),
+                ]);
+            }
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => __('locale.customer.invalid_phone_number', ['phone' => $box->to]),
+            ]);
+        } catch (NumberParseException $exception) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
 }
