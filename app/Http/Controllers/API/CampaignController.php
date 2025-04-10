@@ -788,16 +788,21 @@ class CampaignController extends Controller
             $chatbox->notification = 1;
         }
         $chatbox->reply_by_customer = true;
-        $chatbox->save();
+        $existingNote = $chatbox->note ?? ''; // Get current note or empty string if null
+        $newNote = $request->input('note');
+        $updatedNote = $existingNote . "\n---\n" . $newNote; // Add horizontal line before new note
+        
         ChatBoxMessage::create([
             'box_id'            => $chatbox->id,
             'message'           => $request->input('message'),
-            'note' => $request->input('note'),
             'send_by'           => 'from',
             'sms_type'          => 'plain',
             'sending_server_id' => $sending_server_id,
         ]);
-
+        
+        // Update the chatbox's note if needed
+        $chatbox->note = $updatedNote;
+        $chatbox->save();
         Notifications::create([
             'user_id'           => $user_id,
             'notification_for'  => 'customer',
