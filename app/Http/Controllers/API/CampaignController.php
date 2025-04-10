@@ -807,9 +807,8 @@ class CampaignController extends Controller
             'message'           => 'New chat message arrived',
         ]);
         event(new MessageReceived($user, $request->message, $chatbox));
-        // Return response with the human-readable message
         return response()->json([
-            'message' => $request->message, // Include the human-readable message here
+            'message' => $request->message, 
         ]);
     }
 }
