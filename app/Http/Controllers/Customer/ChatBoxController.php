@@ -439,22 +439,9 @@ class ChatBoxController extends Controller
         // Sorting by latest updated
         $query->orderByDesc('updated_at')->with(['chatBoxMessages', 'contact']);
 
-        // Log the final query before execution
-        Log::info('Executing query', [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings(),
-        ]);
-
+       
         // Paginate the results
         $chat_box = $query->paginate(500, ['*'], 'page', $page);
-
-        // Log the pagination details
-        Log::info('Pagination details', [
-            'current_page' => $chat_box->currentPage(),
-            'total_pages' => $chat_box->lastPage(),
-            'total_records' => $chat_box->total(),
-        ]);
-
         return view('customer.ChatBox.partials._chat_list', compact('chat_box'))->render();
     }
 

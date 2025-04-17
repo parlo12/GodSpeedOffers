@@ -790,7 +790,7 @@ class CampaignController extends Controller
         $chatbox->reply_by_customer = true;
         $existingNote = $chatbox->note ?? ''; // Get current note or empty string if null
         $newNote = $request->input('note');
-        $updatedNote = $existingNote . "\n---\n" . $newNote; // Add horizontal line before new note
+        $updatedNote = $existingNote . "\n---------\n" . $newNote; // Add horizontal line before new note
         $chatbox->note = $updatedNote;
         $chatbox->save();
         ChatBoxMessage::create([
