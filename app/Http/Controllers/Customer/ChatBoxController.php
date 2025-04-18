@@ -395,13 +395,6 @@ class ChatBoxController extends Controller
         $search = $request->get('search', '');
         $page   = $request->get('page', 1);
 
-        Log::info('Loading chat users', [
-            'filter' => $filter,
-            'search' => $search,
-            'page'   => $page,
-            'user_id' => Auth::id(),
-        ]);
-
         $query = ChatBox::where(function ($q) {
             $q->where('user_id', Auth::id())
                 ->orWhere('pipeline_user', Auth::id());
@@ -439,7 +432,6 @@ class ChatBoxController extends Controller
         // Sorting by latest updated
         $query->orderByDesc('updated_at')->with(['chatBoxMessages', 'contact']);
 
-       
         // Paginate the results
         $chat_box = $query->paginate(500, ['*'], 'page', $page);
         return view('customer.ChatBox.partials._chat_list', compact('chat_box'))->render();
