@@ -63,6 +63,7 @@ use App\Http\Controllers\VoiceController;
     Route::post('sms/reply', 'CampaignController@reply')->name('sms.reply');
     Route::post('sms/wake-time', 'CampaignController@get_wake_time')->name('sms.wake_time');
     Route::post('sms/star-lead', 'CampaignController@star_lead')->name('sms.star_lead');
+    Route::post('sms/ai-call-summary', 'CampaignController@ai_call_summary')->name('sms.ai_call_summary');
 
     /*
     |-------------------------------------------------------------------------

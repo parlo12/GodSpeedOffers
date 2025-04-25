@@ -518,8 +518,8 @@ class CampaignController extends Controller
         }
 
         $box = ChatBox::where('to', $phone)
-        ->where('from', $sending_number)
-        ->first();
+            ->where('from', $sending_number)
+            ->first();
         if (config('app.stage') === 'demo') {
             return response()->json([
                 'status'  => 'error',
@@ -634,49 +634,49 @@ class CampaignController extends Controller
                 'message' => $exception->getMessage(),
             ]);
         }
-    } 
+    }
     public function get_wake_time(R $request)
     {
         $this->authorize('chat_box');
         Log::info("here");
         // Validate the incoming request
-      
-    
+
+
         try {
             // Extract parameters
             $phone = $request->input('phone');
             $sending_number = $request->input('sending_number');
-    
+
             Log::info("Fetching chatbox record", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
             ]);
-    
+
             // Find the chatbox record
             $chatbox = Chatbox::where('to', $phone)
                 ->where('from', $sending_number)
                 ->first();
-    
+
             // Check if a record was found
             if (!$chatbox) {
                 Log::warning("No chatbox record found", [
                     'phone' => $phone,
                     'sending_number' => $sending_number,
                 ]);
-    
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No chatbox record found for the given parameters',
                 ], 404);
             }
-    
+
             // Log the wake time
             Log::info("Chatbox record found", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
                 'wake_time' => $chatbox->wake_time,
             ]);
-    
+
             // Return the wake_time from the chatbox
             return response()->json([
                 'status' => 'success',
@@ -689,7 +689,7 @@ class CampaignController extends Controller
                 'phone' => $request->input('phone'),
                 'sending_number' => $request->input('sending_number'),
             ]);
-    
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing your request',
@@ -702,43 +702,43 @@ class CampaignController extends Controller
         $this->authorize('chat_box');
         Log::info("starring here");
         // Validate the incoming request
-      
-    
+
+
         try {
             // Extract parameters
             $phone = $request->input('phone');
             $sending_number = $request->input('sending_number');
-    
+
             Log::info("Fetching chatbox record", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
             ]);
-    
+
             // Find the chatbox record
             $chatbox = Chatbox::where('to', $phone)
                 ->where('from', $sending_number)
                 ->first();
-    
+
             // Check if a record was found
             if (!$chatbox) {
                 Log::warning("No chatbox record found", [
                     'phone' => $phone,
                     'sending_number' => $sending_number,
                 ]);
-    
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No chatbox record found for the given parameters',
                 ], 404);
             }
-    
+
             // Log the wake time
             Log::info("Chatbox record found", [
                 'phone' => $phone,
                 'sending_number' => $sending_number,
                 'wake_time' => $chatbox->wake_time,
             ]);
-            $chatbox->is_starred=1;
+            $chatbox->is_starred = 1;
             $chatbox->save();
             // Return the wake_time from the chatbox
             return response()->json([
@@ -752,7 +752,7 @@ class CampaignController extends Controller
                 'phone' => $request->input('phone'),
                 'sending_number' => $request->input('sending_number'),
             ]);
-    
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing your request',
@@ -760,5 +760,55 @@ class CampaignController extends Controller
             ], 500);
         }
     }
-    
+    public function ai_call_summary(Campaigns $campaign, R $request): JsonResponse
+    {
+
+        if (! request()->user()->can('developers')) {
+            return $this->error('You do not have permission to access API', 403);
+        }
+        $from = ltrim($request->input('sending_number'), '+');
+        $to = ltrim($request->input('phone'), '+');
+        Log::info($to);
+        $phone_number = PhoneNumbers::where('number', $from)
+            ->where('status', 'assigned')
+            ->first();
+        $sending_server_id = $phone_number->sending_server_id;
+        $user_id = $phone_number->user_id;
+        $user    = User::find($user_id);
+        $chatbox = ChatBox::firstOrNew([
+            'user_id'           => $user_id,
+            'from'              => $from,
+            'to'                => $to,
+            'sending_server_id' => $sending_server_id,
+
+        ]);
+        if ($chatbox->notification) {
+            $chatbox->notification = $chatbox->notification + 1;
+        } else {
+            $chatbox->notification = 1;
+        }
+        $chatbox->reply_by_customer = true;
+        $existingNote = $chatbox->note ?? ''; // Get current note or empty string if null
+        $newNote = $request->input('note');
+        $updatedNote = $existingNote . "\n---------\n" . $newNote; // Add horizontal line before new note
+        $chatbox->note = $updatedNote;
+        $chatbox->save();
+        ChatBoxMessage::create([
+            'box_id'            => $chatbox->id,
+            'message'           => $request->input('message'),
+            'send_by'           => 'from',
+            'sms_type'          => 'plain',
+            'sending_server_id' => $sending_server_id,
+        ]);
+        Notifications::create([
+            'user_id'           => $user_id,
+            'notification_for'  => 'customer',
+            'notification_type' => 'chatbox',
+            'message'           => 'New chat message arrived',
+        ]);
+        event(new MessageReceived($user, $request->message, $chatbox));
+        return response()->json([
+            'message' => $request->message, 
+        ]);
+    }
 }
