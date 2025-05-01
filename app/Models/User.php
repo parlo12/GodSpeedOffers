@@ -62,6 +62,7 @@
             'email_verified_at',
             'two_factor_backup_code',
             'api_sending_server',
+            'workflow_apikey'
         ];
 
         /**
