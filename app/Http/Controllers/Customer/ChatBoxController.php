@@ -971,6 +971,7 @@ class ChatBoxController extends Controller
     private function get_message($phoneNumber)
     {
         try {
+            Log::info('workflow key',auth()->user()->workflow_apikey);
             $response = Http::get("https://internaltools.godspeedoffers.com/api/get-message/{$phoneNumber}", [
                 'workflow_apikey' => auth()->user()->workflow_apikey,
             ]);
