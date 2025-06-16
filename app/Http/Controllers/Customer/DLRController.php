@@ -2436,6 +2436,7 @@ foreach ($keywords as $keyword) {
         $response = curl_exec($ch);
         if (curl_errno($ch)) {
             $errorMessage = curl_error($ch);
+            Log::info("breaking here");
             Log::error("cURL error occurred: $errorMessage");
             return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
         }
