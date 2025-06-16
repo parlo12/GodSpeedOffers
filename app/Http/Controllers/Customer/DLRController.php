@@ -2391,7 +2391,7 @@ foreach ($keywords as $keyword) {
      * Processes an inbound text using TextBelt.
      *
      * @param Request $request The request object containing the input data.
-     * @return string The result of the inbound text processing.
+     * @return string The result of the inbound
      *
      * @throws NumberParseException
      * @throws Throwable
