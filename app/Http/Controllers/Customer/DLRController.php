@@ -399,6 +399,7 @@ class DLRController extends Controller
      */
     public static function inboundDLR($to, $message, $sending_sever, $cost, $from = null, $media_url = null, $extra = null, int $user_id = 1): JsonResponse|string
     {
+        Log::info("Received inbound message: to={$to}, from={$from}, message={$message}, media_url={$media_url}, extra={$extra}");
         if (config('app.stage') == 'demo') {
             return response()->json([
                 'status'  => 'error',
