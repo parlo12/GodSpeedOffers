@@ -468,11 +468,7 @@ foreach ($keywords as $keyword) {
             Log::error("cURL error occurred: $errorMessage");
           //  return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
         }
-
-        // Get the HTTP response code
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        // Close the cURL session
         curl_close($ch);
 
         // Decode the response (assuming the API returns JSON)
