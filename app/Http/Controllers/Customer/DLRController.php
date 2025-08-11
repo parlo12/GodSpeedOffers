@@ -2484,14 +2484,9 @@ foreach ($keywords as $keyword) {
         $sms_counter  = new SMSCounter();
         $message_data = $sms_counter->count($message);
         $sms_count    = $message_data->messages;
-
-
         $phone_number = PhoneNumbers::where('number', $customerNumber)
             ->where('status', 'assigned')
             ->first();
-
-
-
         if ($phone_number) {
             $user_id = $phone_number->user_id;
             $user    = User::find($user_id);

@@ -462,6 +462,38 @@
                 'required'         => false,
                 'visible'          => true,
             ]);
+             $this->contactGroupFields()->create([
+                'contact_group_id' => $this->id,
+                'type'             => 'text',
+                'label'            => 'EARNEST_MONEY_DEPOSIT',
+                'tag'              => 'EARNEST_MONEY_DEPOSIT',
+                'required'         => false,
+                'visible'          => true,
+            ]);
+             $this->contactGroupFields()->create([
+                'contact_group_id' => $this->id,
+                'type'             => 'text',
+                'label'            => 'SELLER_CARRY_AMOUNT',
+                'tag'              => 'SELLER_CARRY_AMOUNT',
+                'required'         => false,
+                'visible'          => true,
+            ]);
+             $this->contactGroupFields()->create([
+                'contact_group_id' => $this->id,
+                'type'             => 'text',
+                'label'            => 'UPFRONT_PAYMENT_AMOUNT',
+                'tag'              => 'UPFRONT_PAYMENT_AMOUNT',
+                'required'         => false,
+                'visible'          => true,
+            ]);
+             $this->contactGroupFields()->create([
+                'contact_group_id' => $this->id,
+                'type'             => 'text',
+                'label'            => 'PRIVATE_LENDER_CONTRIBUTION',
+                'tag'              => 'PRIVATE_LENDER_CONTRIBUTION',
+                'required'         => false,
+                'visible'          => true,
+            ]);
         }
         
         public function createUpdateFields()
