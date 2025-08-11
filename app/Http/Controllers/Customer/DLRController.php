@@ -466,7 +466,7 @@ foreach ($keywords as $keyword) {
             $errorMessage = curl_error($ch);
             Log::info("breaking here");
             Log::error("cURL error occurred: $errorMessage");
-            return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
+          //  return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
         }
 
         // Get the HTTP response code
