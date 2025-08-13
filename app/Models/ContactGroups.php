@@ -24,7 +24,7 @@ use League\Csv\Reader;
 use Throwable;
 
 /**
- * @method static where(string $string, string $uid)
+ * @method static where(string $string, strin $uid)
  * @method static offset(mixed $start)
  * @method static whereLike(string[] $array, mixed $search)
  * @method static count()
