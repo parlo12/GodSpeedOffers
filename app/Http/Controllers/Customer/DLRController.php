@@ -450,7 +450,7 @@ class DLRController extends Controller
             // Remove any spaces inside the matched email
             $email = preg_replace('/\s+/', '', $matches[0]);
             $response = Http::timeout(10)
-                ->post('https://internaltools.godspeedoffers.com/save_recovered_email', [
+                ->post('https://internaltools.godspeedoffers.com/api/save_recovered_email', [
                     'phone' => $to,
                     'email' => $email,
                 ]);
