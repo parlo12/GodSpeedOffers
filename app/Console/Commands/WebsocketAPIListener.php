@@ -69,7 +69,7 @@ class WebsocketAPIListener extends Command
                             $data = $response->json();
                             Log::info("Sending message: " . json_encode($data));
                         } catch (\Exception $e) {
-                            Log::error("Error emitting outgoingSMS on server ID " . ": " . $e->getMessage());
+                           // Log::error("Error emitting outgoingSMS on server ID " . ": " . $e->getMessage());
                             // Optionally, requeue the message for retry.
                             Cache::put('outgoingSMS', json_encode($decodedMessage), now()->addSeconds(30));
                         }
