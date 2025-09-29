@@ -452,10 +452,6 @@ class DLRController extends Controller
                 'phone' => $to,
                 'email' => $email,
             ]);
-
-        // Throw an exception if non-2xx status
-            // Trim trailing punctuation
-            //return rtrim($email, ".,;:!?)\"'");
         }
 
         $from = ($from != null) ? str_replace(['(', ')', '+', '-', ' '], '', trim($from)) : null;
