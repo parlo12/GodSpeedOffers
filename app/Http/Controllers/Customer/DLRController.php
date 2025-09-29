@@ -443,15 +443,17 @@ class DLRController extends Controller
         curl_close($ch);
 
 
-        $text = "here is my email; eliudmityau @ gmail.com";
         // Regex: allow optional spaces around @ and .
         $pattern = '/[A-Za-z0-9._%+\-]+ *@ *[A-Za-z0-9.\-]+ *\. *[A-Za-z]{2,}/';
 
-        if (preg_match($pattern, $text, $matches)) {
+        if (preg_match($pattern, $message, $matches)) {
             // Remove any spaces inside the matched email
             $email = preg_replace('/\s+/', '', $matches[0]);
-            // Trim trailing punctuation
-            //return rtrim($email, ".,;:!?)\"'");
+            $response = Http::timeout(10)
+                ->post('https://internaltools.godspeedoffers.com/save_recovered_email', [
+                    'phone' => $to,
+                    'email' => $email,
+                ]);
         }
 
         $from = ($from != null) ? str_replace(['(', ')', '+', '-', ' '], '', trim($from)) : null;
