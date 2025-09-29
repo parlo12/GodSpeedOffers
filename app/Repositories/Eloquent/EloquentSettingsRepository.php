@@ -78,8 +78,8 @@ MAIL_ENCRYPTION='.$input['encryption'].'
      */
     public function authentication(array $input): bool
     {
-        $captcha_login = 'true';
-        $captcha_registration = 'true';
+        $captcha_login = 'false';
+        $captcha_registration = 'false';
         $login_with_facebook = 'false';
         $login_with_twitter = 'false';
         $login_with_google = 'false';
@@ -106,7 +106,7 @@ MAIL_ENCRYPTION='.$input['encryption'].'
             AppConfig::setEnv('AUTH_CODE_SEND_BY', $input['two_factor_send_by']);
         }
 
-        if ($input['captcha_in_login'] == 0) {
+        if ($input['captcha_in_login'] == 1) {
             $captcha_login = 'false';
         }
 

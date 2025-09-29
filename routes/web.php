@@ -21,8 +21,9 @@
             return redirect('install');
         }
 
-        return redirect('login');
-    });
+        //return redirect('login');
+        return response()->file(public_path('launchpad/index.html'));
+    })->name('landing');
 
 // locale Route
     Route::get('lang/{locale}', [LanguageController::class, 'swap']);
