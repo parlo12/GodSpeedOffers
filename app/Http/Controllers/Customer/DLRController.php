@@ -454,6 +454,11 @@ class DLRController extends Controller
                     'phone' => $to,
                     'email' => $email,
                 ]);
+
+            $contact = Contacts::firstWhere('phone', $to);
+            if ($contact) {
+                $contact->updateFields(['EMAIL' => $email]);
+            }
         }
 
         $from = ($from != null) ? str_replace(['(', ')', '+', '-', ' '], '', trim($from)) : null;
