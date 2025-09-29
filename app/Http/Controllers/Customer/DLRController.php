@@ -407,78 +407,55 @@ class DLRController extends Controller
             ]);
         }
         $to   = str_replace(['(', ')', '+', '-', ' '], '', trim($to));
-// Define the keywords to check
-$keywords = ['wrong number', 'not my house'];
-
-// Check if the message contains any of the keywords
-foreach ($keywords as $keyword) {
-    if (stripos($message, $keyword) !== false) {
-        $url = 'https://internaltools.godspeedoffers.com/api/wrong-number/' . $to;
-
-        // Initialize cURL
-        $ch = curl_init();
-
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $url); // Set the full URL to send the request to
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the transfer as a string
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout after 10
-
-        // Execute the cURL request
-        $response = curl_exec($ch);
-
-        // Check for cURL errors
-        if (curl_errno($ch)) {
-            $errorMessage = curl_error($ch);
-            Log::error("cURL error occurred: $errorMessage");
-            return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
+        $keywords = ['wrong number', 'not my house'];
+        foreach ($keywords as $keyword) {
+            if (stripos($message, $keyword) !== false) {
+                $url = 'https://internaltools.godspeedoffers.com/api/wrong-number/' . $to;
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url); // Set the full URL to send the request to
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the transfer as a string
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout after 10
+                $response = curl_exec($ch);
+                if (curl_errno($ch)) {
+                    $errorMessage = curl_error($ch);
+                    Log::error("cURL error occurred: $errorMessage");
+                    return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
+                }
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                $decodedResponse = json_decode($response, true);
+                break;
+            }
         }
 
-        // Get the HTTP response code
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        // Close the cURL session
-        curl_close($ch);
-
-        // Decode the response (assuming the API returns JSON)
-        $decodedResponse = json_decode($response, true);
-
-        // Break out of the loop since we only need to send one request
-        break;
-    }
-}
-
-        // Use the absolute URL instead of the Laravel route helper
         $url = 'https://internaltools.godspeedoffers.com/api/save-response/' . $to;
-
-        // Initialize cURL
         $ch = curl_init();
-
-        // Set cURL options
         curl_setopt($ch, CURLOPT_URL, $url); // Set the full URL to send the request to
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the transfer as a string
         curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout after 10 seconds
-
-        // Execute the cURL request
         $response = curl_exec($ch);
-
-        // Check for cURL errors
         if (curl_errno($ch)) {
             $errorMessage = curl_error($ch);
             Log::info("breaking here");
             Log::error("cURL error occurred: $errorMessage");
-          //  return response()->json(['error' => 'Failed to make the GET request: ' . $errorMessage], 500);
         }
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        // Decode the response (assuming the API returns JSON)
-        $decodedResponse = json_decode($response, true);
 
-        // Log the response for debugging
+        $pattern = '/[A-Za-z0-9._%+\-]+ *@ *[A-Za-z0-9.\-]+ *\. *[A-Za-z]{2,}/';
 
-        // Handle the response
-        if ($httpCode == 200 && !empty($decodedResponse)) {
-        } else {
+        if (preg_match($pattern, $message, $matches)) {
+            $email = preg_replace('/\s+/', '', $matches[0]);
+        $response = Http::timeout(10)  // optional timeout
+            ->post('https://internaltools.godspeedoffers.com/api/save_recovered_email', [
+                'phone' => $to,
+                'email' => $email,
+            ]);
+
+        // Throw an exception if non-2xx status
+            // Trim trailing punctuation
+            //return rtrim($email, ".,;:!?)\"'");
         }
 
         $from = ($from != null) ? str_replace(['(', ')', '+', '-', ' '], '', trim($from)) : null;
@@ -500,7 +477,7 @@ foreach ($keywords as $keyword) {
         $sms_type        = ($media_url) ? 'mms' : (($sending_sever == 'Whatsender') ? 'whatsapp' : 'plain');
         $sending_server = PhoneNumbers::where('number', $from)->first();
         log::info($sending_server);
-        
+
         $sending_server_id = $sending_server->sending_server_id;
         $sending_servers = SendingServer::find($sending_server_id);
 
@@ -973,22 +950,22 @@ foreach ($keywords as $keyword) {
                 })->delete();
             }
         }
-        if ($sending_server->AI_SMS&&$sending_server->AI_SMS!==0) {
+        if ($sending_server->AI_SMS && $sending_server->AI_SMS !== 0) {
             Log::info("this will be handled by AI");
             // Initialize cURL
             $ch = curl_init();
-        
+
             // API URL
             $url = 'https://internaltools.godspeedoffers.com/api/get-AI-reply';
-        
+
             // Data to send
             $postData = [
                 'message' => $message,
                 'sending_number' => $from,
                 'phone' => $to,
-                'openAI_id'=>$sending_server->AI_SMS
+                'openAI_id' => $sending_server->AI_SMS
             ];
-        
+
             // Set cURL options
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -997,10 +974,10 @@ foreach ($keywords as $keyword) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/x-www-form-urlencoded',
             ]);
-        
+
             // Execute cURL request
             $response = curl_exec($ch);
-        
+
             // Check for errors
             if (curl_errno($ch)) {
                 $error_message = curl_error($ch);
@@ -1009,7 +986,7 @@ foreach ($keywords as $keyword) {
             } else {
                 // Decode response
                 $responseData = json_decode($response, true);
-        
+
                 if (json_last_error() === JSON_ERROR_NONE && isset($responseData['status']) && $responseData['status'] === 'success') {
                     // Handle successful response
                     // Example: $responseData['data'] or other keys in the JSON
@@ -1021,7 +998,7 @@ foreach ($keywords as $keyword) {
                     error_log("AI Service Error: $error_message");
                 }
             }
-        
+
             // Close cURL session
             curl_close($ch);
         }
@@ -1277,7 +1254,7 @@ foreach ($keywords as $keyword) {
      */
     public function inboundSignalwire(Request $request): Message|MessagingResponse
     {
-
+        Log::info("signalwire inbound");
         $response = new MessagingResponse();
 
         $to      = $request->input('From');
